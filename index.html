@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lab Schedule</title>
+<style>
+  * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+  body { margin: 0; background: #f1f5f9; color: #0f172a; padding-bottom: 85px; }
+  .hdr { background: #0f172a; color: #fff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+  .hdr-title { display: flex; align-items: center; gap: 14px; }
+  .hdr h1 { margin: 0; font-size: 21px; }
+  .sync-badge { font-size: 12px; color: #cbd5e1; display: flex; align-items: center; gap: 6px; margin-top: 2px; cursor: pointer; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot-ok { background: #10b981; box-shadow: 0 0 6px #10b981; }
+  .dot-wait { background: #f59e0b; }
+  .ilan-avatar { width: 52px; height: 52px; border-radius: 50%; overflow: hidden; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.25); flex-shrink: 0; cursor: pointer; background: #4dd0e1; display: flex; align-items: center; justify-content: center; }
+  .ilan-avatar img, .ilan-avatar svg { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .btn-main { background: #2563eb; color: #fff; border: 0; padding: 10px 18px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
+  .btn-main:hover { background: #1d4ed8; }
+  .btn-cal { background: #0078d4; color: #fff; border: 0; padding: 10px 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 13px; width: 100%; margin-top: 8px; }
+  .bar { background: #fff; border-bottom: 1px solid #cbd5e1; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .btn-sec { background: #e2e8f0; border: 0; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; color: #1e293b; }
+  .btn-sec:hover { background: #cbd5e1; }
+  .wrap { padding: 20px; max-width: 1650px; margin: 0 auto; }
+  .main-layout { display: flex; flex-direction: column; gap: 20px; }
+  @media (min-width: 1024px) {
+    .main-layout { flex-direction: row; align-items: flex-start; }
+    .board-side { width: 330px; flex-shrink: 0; position: sticky; top: 85px; }
+    .schedule-side { flex: 1; min-width: 0; }
+  }
+  .board-card { background: #fffbeb; border: 2px solid #f59e0b; border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(245,158,11,0.1); }
+  .board-hdr { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #fde68a; padding-bottom: 12px; margin-bottom: 12px; }
+  .board-note { background: #fff; border: 1px solid #fde68a; border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 14px; line-height: 1.4; }
+  .tbl-box { background: #fff; border-radius: 16px; border: 1px solid #cbd5e1; overflow-x: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+  table { width: 100%; border-collapse: collapse; min-width: 920px; font-size: 15px; }
+  th, td { border-left: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; padding: 12px; vertical-align: top; }
+  th { background: #f8fafc; text-align: center; font-size: 16px; padding: 14px 10px; }
+  .eq-col { background: #f8fafc; font-weight: bold; width: 150px; text-align: right; font-size: 16px; }
+  .cell { cursor: pointer; min-height: 125px; width: 18%; transition: background 0.15s; }
+  .cell:hover { background: #f1f5f9; }
+  .item { padding: 8px 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #cbd5e1; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s; }
+  .item:hover { transform: translateY(-1px); }
+  .c-controls { background: #dbeafe; border-color: #60a5fa; color: #1e3a8a; }
+  .c-mts { background: #d1fae5; border-color: #34d399; color: #064e3b; }
+  .c-actuators { background: #f3e8ff; border-color: #c084fc; color: #581c87; }
+  .c-casting { background: #fef3c7; border-color: #fbbf24; color: #78350f; }
+  .c-polishing { background: #ffe4e6; border-color: #fb7185; color: #881337; }
+  .c-other { background: #ccfbf1; border-color: #2dd4bf; color: #134e4a; }
+  .row-top { display: flex; justify-content: space-between; align-items: center; font-weight: bold; gap: 4px; margin-bottom: 4px; }
+  .act-btns { display: flex; gap: 3px; align-items: center; }
+  .del-btn { background: rgba(255,255,255,0.8); border: 1px solid #fca5a5; border-radius: 5px; color: #dc2626; font-weight: bold; cursor: pointer; padding: 1px 5px; font-size: 11px; }
+  .cal-mini { background: rgba(255,255,255,0.85); border: 1px solid #94a3b8; border-radius: 5px; font-size: 11px; padding: 1px 5px; cursor: pointer; font-weight: bold; color: #0f172a; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #fff; }
+  .tag-wait { background: #f59e0b; }
+  .tag-ok { background: #059669; }
+  .add-hint { color: #94a3b8; font-size: 12px; text-align: center; padding: 8px 0; font-weight: 600; }
+  .nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #cbd5e1; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 30; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+  .nav button { background: none; border: 0; padding: 14px 6px; font-weight: bold; font-size: 14px; color: #64748b; cursor: pointer; }
+  .nav button.active { color: #2563eb; border-top: 3px solid #2563eb; background: #f8fafc; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+  .modal { background: #fff; border-radius: 16px; max-width: 440px; width: 100%; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+  .field input, .field select, .field textarea { width: 100%; padding: 9px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #fff; }
+  .err { background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-bottom: 12px; }
+  .card { background: #fff; border: 1px solid #cbd5e1; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  .days-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; }
+  .day-btn { padding: 10px 4px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 13px; }
+  .day-btn.active { background: #2563eb; color: #fff; border-color: #2563eb; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<input type="file" id="avatar_upload" accept="image/*" style="display:none" onchange="uploadAvatarFile(event)">
+<div id="app"></div>
+
+<script>
+var ILAN_SVG = '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">' +
+  '<circle cx="60" cy="60" r="60" fill="#4dd0e1"/>' +
+  '<path d="M22 52 L24 57 L29 59 L24 61 L22 66 L20 61 L15 59 L20 57 Z" fill="#fff"/>' +
+  '<path d="M96 42 L98 46 L102 48 L98 50 L96 54 L94 50 L90 48 L94 46 Z" fill="#fff"/>' +
+  '<path d="M92 64 L94 68 L98 70 L94 72 L92 76 L90 72 L86 70 L90 68 Z" fill="#fff"/>' +
+  '<circle cx="24" cy="36" r="11" fill="#fff" stroke="#4e2618" stroke-width="2.5"/>' +
+  '<path d="M30 45 L35 49 L33 42 Z" fill="#fff" stroke="#4e2618" stroke-width="2"/>' +
+  '<circle cx="20" cy="36" r="1.8" fill="#1e88e5"/>' +
+  '<circle cx="24" cy="36" r="1.8" fill="#1e88e5"/>' +
+  '<circle cx="28" cy="36" r="1.8" fill="#1e88e5"/>' +
+  '<path d="M38 78 Q25 75 22 64" fill="none" stroke="#ffcca8" stroke-width="8" stroke-linecap="round"/>' +
+  '<path d="M38 78 Q25 75 22 64" fill="none" stroke="#4e2618" stroke-width="2.5" stroke-linecap="round"/>' +
+  '<path d="M82 78 Q95 79 98 84" fill="none" stroke="#ffcca8" stroke-width="8" stroke-linecap="round"/>' +
+  '<path d="M82 78 Q95 79 98 84" fill="none" stroke="#4e2618" stroke-width="2.5" stroke-linecap="round"/>' +
+  '<rect x="44" y="96" width="32" height="24" rx="4" fill="#2979ff" stroke="#4e2618" stroke-width="2.5"/>' +
+  '<line x1="60" y1="103" x2="60" y2="120" stroke="#4e2618" stroke-width="2.5"/>' +
+  '<path d="M38 70 L82 70 L86 84 L78 86 L76 98 L44 98 L42 86 L34 84 Z" fill="#1a4373" stroke="#4e2618" stroke-width="2.5" stroke-linejoin="round"/>' +
+  '<ellipse cx="32" cy="48" rx="5" ry="7" fill="#ffcca8" stroke="#4e2618" stroke-width="2.5"/>' +
+  '<ellipse cx="88" cy="48" rx="5" ry="7" fill="#ffcca8" stroke="#4e2618" stroke-width="2.5"/>' +
+  '<circle cx="60" cy="45" r="28" fill="#ffcca8" stroke="#4e2618" stroke-width="2.5"/>' +
+  '<path d="M33 38 C32 28 38 22 42 26 C39 32 37 40 35 45 Z" fill="#9e958e"/>' +
+  '<path d="M87 38 C88 28 82 22 78 26 C81 32 83 40 85 45 Z" fill="#9e958e"/>' +
+  '<ellipse cx="47" cy="24" rx="5" ry="2.2" transform="rotate(-25 47 24)" fill="#fff" opacity="0.75"/>' +
+  '<path d="M44 37 Q48 34 52 37" fill="none" stroke="#4e2618" stroke-width="2.5" stroke-linecap="round"/>' +
+  '<path d="M68 37 Q72 34 76 37" fill="none" stroke="#4e2618" stroke-width="2.5" stroke-linecap="round"/>' +
+  '<circle cx="48" cy="44" r="3.2" fill="#4e2618"/>' +
+  '<circle cx="72" cy="44" r="3.2" fill="#4e2618"/>' +
+  '<ellipse cx="42" cy="50" rx="4" ry="2.2" fill="#ff8a80" opacity="0.6"/>' +
+  '<ellipse cx="78" cy="50" rx="4" ry="2.2" fill="#ff8a80" opacity="0.6"/>' +
+  '<path d="M59 45 Q57 48 60 50" fill="none" stroke="#4e2618" stroke-width="2.2" stroke-linecap="round"/>' +
+  '<path d="M49 54 Q60 63 71 54 Z" fill="#fff" stroke="#4e2618" stroke-width="2.5" stroke-linejoin="round"/>' +
+  '</svg>';
+
+var T = {
+  title: "\u05d6\u05de\u05d9\u05e0\u05d5\u05ea \u05de\u05db\u05e9\u05d9\u05e8\u05d9\u05dd \u2013 \u05de\u05e2\u05d1\u05d3\u05d4",
+  casting: "\u05e2\u05de\u05d3\u05ea \u05d9\u05e6\u05d9\u05e7\u05d4",
+  polishing: "\u05de\u05db\u05d5\u05e0\u05ea \u05dc\u05d9\u05d8\u05d5\u05e9",
+  other: "\u05d0\u05d7\u05e8",
+  ido: "\u05d0\u05d9\u05d3\u05d5",
+  exp1: "\u05e0\u05d9\u05e1\u05d5\u05d9 \u05d3\u05d7\u05d9\u05e1\u05ea \u05dc\u05d9\u05dc\u05d4",
+  alon: "\u05d0\u05dc\u05d5\u05df \u05d5\u05d9\u05d9\u05e0\u05e8",
+  exp2: "\u05d1\u05d3\u05d9\u05e7\u05ea \u05de\u05e2\u05e8\u05db\u05ea",
+  bar: "\u05d1\u05e8 \u05d1\u05de\u05e0\u05d9",
+  exp3: "\u05d9\u05e6\u05d9\u05e7\u05ea \u05de\u05e8\u05d2\u05dc\u05d9\u05ea 5",
+  exp4: "\u05dc\u05d9\u05d8\u05d5\u05e9 \u05d3\u05d2\u05de\u05d9\u05dd",
+  exp5: "\u05d9\u05e6\u05d9\u05e7\u05ea \u05de\u05e8\u05d2\u05dc\u05d9\u05ea 6",
+  ortalGabi: "\u05d0\u05d5\u05e8\u05d8\u05dc \u05d5\u05d2\u05d1\u05d9",
+  expCubes: "\u05e0\u05d9\u05e1\u05d5\u05d9\u05d9 \u05e7\u05d5\u05d1\u05d9\u05d5\u05ea \u05d2\u05d9\u05d0\u05d5\u05e4\u05d5\u05dc\u05d9\u05de\u05e8",
+  dobi: "\u05d3\u05d5\u05d1\u05d9 \u05db\u05d4\u05df",
+  expFlex: "\u05e0\u05d9\u05e1\u05d5\u05d9\u05d9 \u05db\u05e4\u05d9\u05e4\u05d4 \u05d1\u05d1\u05d5\u05e7\u05e8",
+  days: ["\u05d0\u05f3", "\u05d1\u05f3", "\u05d2\u05f3", "\u05d3\u05f3", "\u05d4\u05f3"],
+  newBtn: "+ \u05e9\u05d9\u05d1\u05d5\u05e5 \u05d7\u05d3\u05e9",
+  prevW: "\u05e9\u05d1\u05d5\u05e2 \u05e7\u05d5\u05d3\u05dd",
+  nextW: "\u05e9\u05d1\u05d5\u05e2 \u05d4\u05d1\u05d0",
+  workW: "\u05e9\u05d1\u05d5\u05e2 \u05e2\u05d1\u05d5\u05d3\u05d4",
+  dev: "\u05de\u05db\u05e9\u05d9\u05e8",
+  day: "\u05d9\u05d5\u05dd",
+  add: "+ \u05e9\u05d1\u05e5 \u05db\u05d0\u05df",
+  ilanOk: "\u2713 \u05d0\u05d9\u05dc\u05df \u05d0\u05d9\u05e9\u05e8",
+  needIlan: "\u05d3\u05e8\u05d5\u05e9 \u05d0\u05d9\u05dc\u05df",
+  free: "\u05e4\u05e0\u05d5\u05d9 \u05db\u05dc \u05d4\u05d9\u05d5\u05dd",
+  del: "\u05de\u05d7\u05e7",
+  edit: "\u05e2\u05e8\u05d5\u05da",
+  ilanTitle: "\u05d4\u05dc\u05d5\"\u05d6 \u05e9\u05dc \u05d0\u05d9\u05dc\u05df (\u05de\u05e0\u05d4\u05dc \u05de\u05e2\u05d1\u05d3\u05d4)",
+  noIlan: "\u05d0\u05d9\u05df \u05d1\u05e7\u05e9\u05d5\u05ea \u05e2\u05d6\u05e8\u05d4 \u05de\u05d0\u05d9\u05dc\u05df \u05d1\u05d9\u05d5\u05dd \u05d6\u05d4",
+  appBtn: "\u05d0\u05e9\u05e8 \u05d4\u05d2\u05e2\u05d4",
+  mTitleNew: "\u05e9\u05d9\u05d1\u05d5\u05e5 \u05de\u05db\u05e9\u05d9\u05e8 \u05d1\u05de\u05e2\u05d1\u05d3\u05d4",
+  mTitleEdit: "\u05e2\u05e8\u05d9\u05db\u05ea \u05e9\u05d9\u05d1\u05d5\u05e5 \u05e7\u05d9\u05d9\u05dd",
+  dLbl: "\u05d9\u05d5\u05dd \u05d5\u05ea\u05d0\u05e8\u05d9\u05da",
+  sLbl: "\u05e9\u05e2\u05ea \u05d4\u05ea\u05d7\u05dc\u05d4 (24 \u05e9\u05e2\u05d5\u05ea)",
+  eLbl: "\u05e9\u05e2\u05ea \u05e1\u05d9\u05d5\u05dd (24 \u05e9\u05e2\u05d5\u05ea)",
+  stLbl: "\u05e9\u05dd \u05d4\u05e1\u05d8\u05d5\u05d3\u05e0\u05d8",
+  exLbl: "\u05ea\u05d9\u05d0\u05d5\u05e8 \u05e0\u05d9\u05e1\u05d5\u05d9 / \u05e4\u05d9\u05e8\u05d5\u05d8 \u05de\u05db\u05e9\u05d9\u05e8",
+  chkIlan: "\u05e6\u05e8\u05d9\u05da \u05e2\u05d6\u05e8\u05d4 \u05e9\u05dc \u05d0\u05d9\u05dc\u05df \u05d1\u05e9\u05e2\u05d5\u05ea \u05d0\u05dc\u05d5",
+  save: "\u05e9\u05de\u05d5\u05e8 \u05e9\u05d9\u05d1\u05d5\u05e5",
+  saveChanges: "\u05e9\u05de\u05d5\u05e8 \u05e9\u05d9\u05e0\u05d5\u05d9\u05d9\u05dd",
+  cancel: "\u05e1\u05d2\u05d5\u05e8",
+  t1: "\ud83d\udcc5 \u05d8\u05d1\u05dc\u05d4 \u05e9\u05d1\u05d5\u05e2\u05d9\u05ea",
+  t2: "\ud83d\udcf1 \u05d9\u05d5\u05de\u05df \u05d9\u05d5\u05de\u05d9",
+  t3: "\u05d4\u05dc\u05d5\"\u05d6 \u05e9\u05dc \u05d0\u05d9\u05dc\u05df",
+  errN: "\u05e0\u05d0 \u05dc\u05d4\u05d6\u05d9\u05df \u05e9\u05dd",
+  errT: "\u05e9\u05e2\u05ea \u05e1\u05d9\u05d5\u05dd \u05d7\u05d9\u05d9\u05d1\u05ea \u05dc\u05d4\u05d9\u05d5\u05ea \u05d0\u05d7\u05e8\u05d9 \u05d4\u05ea\u05d7\u05dc\u05d4",
+  errE: "\u05d4\u05de\u05db\u05e9\u05d9\u05e8 \u05ea\u05e4\u05d5\u05e1 \u05e2\u05dc \u05d9\u05d3\u05d9 ",
+  errI: "\u05d0\u05d9\u05dc\u05df \u05db\u05d1\u05e8 \u05de\u05e9\u05d5\u05d1\u05e5 \u05dc-",
+  calTitle: "\u05d4\u05d5\u05e1\u05e4\u05ea \u05d4\u05d0\u05d9\u05e8\u05d5\u05e2 \u05dc\u05d9\u05d5\u05de\u05df",
+  outWeb: "\ud83d\udce7 \u05d4\u05d5\u05e1\u05e3 \u05dc-Outlook Web / Office 365",
+  outIcs: "\ud83d\udcc5 \u05e4\u05ea\u05d7 \u05d1-Outlook (\u05de\u05d7\u05e9\u05d1 / \u05d8\u05dc\u05e4\u05d5\u05df)",
+  gCal: "\ud83c\udf10 \u05d4\u05d5\u05e1\u05e3 \u05dc-Google Calendar",
+  ilanAllCal: "\ud83d\udce7 \u05d9\u05d9\u05e6\u05d0 \u05d0\u05ea \u05db\u05dc \u05d4\u05dc\u05d5\"\u05d6 \u05e9\u05dc \u05d0\u05d9\u05dc\u05df \u05dc-Outlook",
+  labLoc: "\u05de\u05e2\u05d1\u05d3\u05d4",
+  boardTitle: "\u05dc\u05d5\u05d7 \u05d4\u05d5\u05d3\u05e2\u05d5\u05ea \u2013 \u05d0\u05d9\u05dc\u05df",
+  boardSub: "\u05e2\u05d3\u05db\u05d5\u05e0\u05d9\u05dd \u05d5\u05d4\u05d5\u05d3\u05e2\u05d5\u05ea \u05e9\u05d1\u05d5\u05e2\u05d9\u05d5\u05ea \u05dc\u05e1\u05d8\u05d5\u05d3\u05e0\u05d8\u05d9\u05dd",
+  addNotePh: "\u05db\u05ea\u05d5\u05d1 \u05d4\u05d5\u05d3\u05e2\u05d4 \u05d7\u05d3\u05e9\u05d4 \u05dc\u05dc\u05d5\u05d7...",
+  addNoteBtn: "\u05e4\u05e8\u05e1\u05dd \u05d1\u05dc\u05d5\u05d7",
+  defNote1: "\u05e0\u05d0 \u05dc\u05ea\u05d0\u05dd \u05d9\u05e6\u05d9\u05e7\u05d5\u05ea \u05d5\u05d1\u05d3\u05d9\u05e7\u05d5\u05ea \u05de\u05e8\u05d0\u05e9 \u05d5\u05dc\u05e0\u05e7\u05d5\u05ea \u05d0\u05ea \u05e2\u05de\u05d3\u05ea \u05d4\u05d9\u05e6\u05d9\u05e7\u05d4 \u05d1\u05e1\u05d9\u05d5\u05dd.",
+  syncOk: "\u05de\u05e1\u05d5\u05e0\u05db\u05e8\u05df \u05dc\u05e2\u05e0\u05df \u05d1\u05d9\u05df \u05d4\u05de\u05db\u05e9\u05d9\u05e8\u05d9\u05dd",
+  syncWait: "\u05de\u05ea\u05d7\u05d1\u05e8 \u05dc\u05e2\u05e0\u05df..."
+};
+
+var EQ = [
+  { id: "controls", name: "CONTROLS", cls: "c-controls" },
+  { id: "mts", name: "MTS", cls: "c-mts" },
+  { id: "actuators", name: "ACTUATORS", cls: "c-actuators" },
+  { id: "casting", name: T.casting, cls: "c-casting" },
+  { id: "polishing", name: T.polishing, cls: "c-polishing" },
+  { id: "other", name: T.other, cls: "c-other" }
+];
+
+var TIMES = [];
+for (var th = 6; th <= 23; th++) {
+  var hs = String(th).padStart(2, "0");
+  TIMES.push(hs + ":00");
+  TIMES.push(hs + ":30");
+}
+TIMES.push("23:59");
+
+var INIT = [
+  {
+    id: "1", equipmentId: "controls", date: "2026-10-25",
+    startTime: "13:00", endTime: "20:00",
+    studentName: T.ido, experiment: T.exp1,
+    needsIlan: false, ilanApproved: false
+  },
+  {
+    id: "2", equipmentId: "controls", date: "2026-10-26",
+    startTime: "08:00", endTime: "10:00",
+    studentName: T.alon, experiment: T.exp2,
+    needsIlan: false, ilanApproved: false
+  },
+  {
+    id: "3", equipmentId: "casting", date: "2026-10-26",
+    startTime: "10:00", endTime: "13:00",
+    studentName: T.bar, experiment: T.exp3,
+    needsIlan: true, ilanApproved: true
+  },
+  {
+    id: "4", equipmentId: "polishing", date: "2026-10-26",
+    startTime: "10:00", endTime: "12:00",
+    studentName: T.alon, experiment: T.exp4,
+    needsIlan: false, ilanApproved: false
+  },
+  {
+    id: "5", equipmentId: "casting", date: "2026-10-29",
+    startTime: "10:00", endTime: "13:00",
+    studentName: T.bar, experiment: T.exp5,
+    needsIlan: true, ilanApproved: false
+  },
+  {
+    id: "6", equipmentId: "controls", date: "2026-11-01",
+    startTime: "09:00", endTime: "11:00",
+    studentName: T.ortalGabi, experiment: T.expCubes,
+    needsIlan: false, ilanApproved: false
+  },
+  {
+    id: "7", equipmentId: "controls", date: "2026-11-03",
+    startTime: "10:00", endTime: "12:00",
+    studentName: T.ortalGabi, experiment: T.expCubes,
+    needsIlan: false, ilanApproved: false
+  },
+  {
+    id: "8", equipmentId: "actuators", date: "2026-11-01",
+    startTime: "09:00", endTime: "11:00",
+    studentName: T.dobi, experiment: T.expFlex,
+    needsIlan: false, ilanApproved: false
+  }
+];
+
+function loadMergedBookings() {
+  var map = {};
+  for (var i = 0; i < INIT.length; i++) {
+    map[INIT[i].id] = INIT[i];
+  }
+  var keys = ["lab_v5", "lab_v6", "lab_v7", "lab_v8", "lab_v9", "lab_v10"];
+  for (var k = 0; k < keys.length; k++) {
+    try {
+      var raw = localStorage.getItem(keys[k]);
+      if (raw) {
+        var arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          for (var j = 0; j < arr.length; j++) {
+            var it = arr[j];
+            var norm = {
+              id: String(it.id || ("m" + j)),
+              equipmentId: it.equipmentId || it.eq || "controls",
+              date: it.date || it.dt || "2026-10-25",
+              startTime: it.startTime || it.st || "09:00",
+              endTime: it.endTime || it.et || "11:00",
+              studentName: it.studentName || it.name || "",
+              experiment: it.experiment || it.exp || "",
+              needsIlan: !!(it.needsIlan || it.ilan),
+              ilanApproved: !!(it.ilanApproved || it.ok),
+              deleted: !!it.deleted
+            };
+            map[norm.id] = norm;
+          }
+        }
+      }
+    } catch (e) {}
+  }
+  var out = [];
+  for (var id in map) {
+    if (map.hasOwnProperty(id) && !map[id].deleted) out.push(map[id]);
+  }
+  return out;
+}
+
+function loadNotes() {
+  try {
+    var n = JSON.parse(localStorage.getItem("lab_notes_v1"));
+    if (Array.isArray(n)) return n;
+  } catch (e) {}
+  return [{ id: "n1", text: T.defNote1 }];
+}
+
+var S = {
+  weekStart: "2026-10-25",
+  tab: "table",
+  dayIso: "2026-10-25",
+  list: loadMergedBookings(),
+  deletedIds: JSON.parse(localStorage.getItem("lab_del_v10") || "{}"),
+  notes: loadNotes(),
+  customAvatar: localStorage.getItem("ilan_avatar_img") || "",
+  synced: false,
+  cloudUrl: localStorage.getItem("lab_custom_cloud") || "https://ntfy.sh/bgu_ilan_lab_sync_2026_v10",
+  modal: false,
+  editId: null,
+  calItem: null,
+  err: "",
+  f: {
+    eq: "controls",
+    date: "2026-10-25",
+    st: "10:00",
+    et: "12:00",
+    name: "",
+    exp: "",
+    ilan: false
+  }
+};
+
+function renderAvatarHtml() {
+  var inner = S.customAvatar ? ('<img src="' + S.customAvatar + '" alt="Ilan">') : ILAN_SVG;
+  return '<div class="ilan-avatar" onclick="triggerAvatarUpload()" title="לחץ להחלפת תמונת אווטר">' + inner + '</div>';
+}
+
+window.triggerAvatarUpload = function() {
+  var el = document.getElementById("avatar_upload");
+  if (el) el.click();
+};
+
+window.uploadAvatarFile = function(ev) {
+  var file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var c = document.createElement("canvas");
+      c.width = 120;
+      c.height = 120;
+      var ctx = c.getContext("2d");
+      ctx.drawImage(img, 0, 0, 120, 120);
+      S.customAvatar = c.toDataURL("image/jpeg", 0.8);
+      try { localStorage.setItem("ilan_avatar_img", S.customAvatar); } catch (err) {}
+      saveAndPush();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+function saveLocalOnly() {
+  try {
+    localStorage.setItem("lab_v10", JSON.stringify(S.list));
+    localStorage.setItem("lab_del_v10", JSON.stringify(S.deletedIds));
+    localStorage.setItem("lab_notes_v1", JSON.stringify(S.notes));
+  } catch (e) {}
+}
+
+// סנכרון ענן בזמן אמת דרך שרת פומבי פתוח (ntfy pub/sub JSON stream) ללא צורך בהרשמה
+function pushCloud() {
+  var payload = {
+    ts: Date.now(),
+    list: S.list,
+    deletedIds: S.deletedIds,
+    notes: S.notes
+  };
+  fetch("https://ntfy.sh/bgu_ilan_lab_sync_2026_v10", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  }).then(function(res) {
+    if (res.ok) {
+      S.synced = true;
+      draw();
+    }
+  }).catch(function() {});
+}
+
+function mergeRemoteState(remote) {
+  if (!remote || !Array.isArray(remote.list)) return;
+  var changed = false;
+
+  if (remote.deletedIds) {
+    for (var dId in remote.deletedIds) {
+      if (remote.deletedIds.hasOwnProperty(dId) && !S.deletedIds[dId]) {
+        S.deletedIds[dId] = true;
+        changed = true;
+      }
+    }
+  }
+
+  var map = {};
+  for (var i = 0; i < S.list.length; i++) {
+    if (!S.deletedIds[S.list[i].id]) {
+      map[S.list[i].id] = S.list[i];
+    } else {
+      changed = true;
+    }
+  }
+
+  for (var j = 0; j < remote.list.length; j++) {
+    var rb = remote.list[j];
+    if (rb && rb.id && !S.deletedIds[rb.id]) {
+      var existing = map[rb.id];
+      if (!existing || (rb.updatedAt || 0) >= (existing.updatedAt || 0)) {
+        if (JSON.stringify(existing) !== JSON.stringify(rb)) {
+          map[rb.id] = rb;
+          changed = true;
+        }
+      }
+    }
+  }
+
+  var merged = [];
+  for (var k in map) {
+    if (map.hasOwnProperty(k)) merged.push(map[k]);
+  }
+  S.list = merged;
+
+  if (Array.isArray(remote.notes) && JSON.stringify(remote.notes) !== JSON.stringify(S.notes)) {
+    S.notes = remote.notes;
+    changed = true;
+  }
+
+  if (changed) {
+    saveLocalOnly();
+    if (!S.modal && !S.calItem) draw();
+  }
+}
+
+function pullCloudHistory() {
+  fetch("https://ntfy.sh/bgu_ilan_lab_sync_2026_v10/json?poll=1&since=48h")
+    .then(function(res) { return res.text(); })
+    .then(function(text) {
+      var lines = text.trim().split("\n");
+      for (var i = 0; i < lines.length; i++) {
+        if (!lines[i]) continue;
+        try {
+          var msg = JSON.parse(lines[i]);
+          if (msg && msg.message) {
+            var data = JSON.parse(msg.message);
+            mergeRemoteState(data);
+          }
+        } catch (e) {}
+      }
+      S.synced = true;
+      if (!S.modal && !S.calItem) draw();
+    }).catch(function() {});
+}
+
+function saveAndPush() {
+  saveLocalOnly();
+  draw();
+  pushCloud();
+}
+
+window.addNote = function(ev) {
+  ev.preventDefault();
+  var inp = document.getElementById("note_inp");
+  if (!inp || !inp.value.trim()) return;
+  S.notes.unshift({
+    id: "n" + Date.now(),
+    text: inp.value.trim()
+  });
+  saveAndPush();
+};
+
+window.delNote = function(id) {
+  S.notes = S.notes.filter(function(n) {
+    return n.id !== id;
+  });
+  saveAndPush();
+};
+
+function getEqName(id) {
+  for (var i = 0; i < EQ.length; i++) {
+    if (EQ[i].id === id) return EQ[i].name;
+  }
+  return id;
+}
+
+function cleanDt(dateStr, timeStr) {
+  return dateStr.replace(/-/g, "") + "T" + timeStr.replace(":", "") + "00";
+}
+
+function makeGCalUrl(b) {
+  var eqName = getEqName(b.equipmentId);
+  var title = eqName + " - " + b.studentName;
+  var details = (b.experiment ? b.experiment + " | " : "") +
+    (b.needsIlan ? T.needIlan : "");
+  var dates = cleanDt(b.date, b.startTime) + "/" +
+    cleanDt(b.date, b.endTime);
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+    "&text=" + encodeURIComponent(title) +
+    "&dates=" + dates +
+    "&details=" + encodeURIComponent(details) +
+    "&location=" + encodeURIComponent(T.labLoc);
+}
+
+function makeOutlookWebUrl(b) {
+  var eqName = getEqName(b.equipmentId);
+  var title = eqName + " - " + b.studentName;
+  var details = (b.experiment ? b.experiment + " | " : "") +
+    (b.needsIlan ? T.needIlan : "");
+  var startIso = b.date + "T" + b.startTime + ":00";
+  var endIso = b.date + "T" + b.endTime + ":00";
+  return "https://outlook.office.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent" +
+    "&subject=" + encodeURIComponent(title) +
+    "&startdt=" + encodeURIComponent(startIso) +
+    "&enddt=" + encodeURIComponent(endIso) +
+    "&body=" + encodeURIComponent(details) +
+    "&location=" + encodeURIComponent(T.labLoc);
+}
+
+function downloadIcs(items, filename) {
+  var lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "METHOD:PUBLISH",
+    "PRODID:-//LabSchedule//HE"
+  ];
+  for (var i = 0; i < items.length; i++) {
+    var b = items[i];
+    var eqName = getEqName(b.equipmentId);
+    var sum = eqName + " - " + b.studentName;
+    var desc = (b.experiment || "") +
+      (b.needsIlan ? " (" + T.needIlan + ")" : "");
+    lines.push("BEGIN:VEVENT");
+    lines.push("UID:" + b.id + "@labschedule");
+    lines.push("DTSTART:" + cleanDt(b.date, b.startTime));
+    lines.push("DTEND:" + cleanDt(b.date, b.endTime));
+    lines.push("SUMMARY:" + sum);
+    lines.push("DESCRIPTION:" + desc);
+    lines.push("LOCATION:" + T.labLoc);
+    lines.push("END:VEVENT");
+  }
+  lines.push("END:VCALENDAR");
+  var blob = new Blob([lines.join("\r\n")], {
+    type: "text/calendar;charset=utf-8"
+  });
+  var link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename || "lab-schedule.ics";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+window.openCalModal = function(id, ev) {
+  if (ev) ev.stopPropagation();
+  for (var i = 0; i < S.list.length; i++) {
+    if (S.list[i].id === id) {
+      S.calItem = S.list[i];
+      draw();
+      return;
+    }
+  }
+};
+
+window.closeCalModal = function() {
+  S.calItem = null;
+  draw();
+};
+
+window.dlSingleIcs = function(id) {
+  for (var i = 0; i < S.list.length; i++) {
+    if (S.list[i].id === id) {
+      downloadIcs([S.list[i]], "outlook-lab-event.ics");
+      return;
+    }
+  }
+};
+
+window.dlIlanAllIcs = function() {
+  var ilanList = S.list.filter(function(b) {
+    return b.needsIlan;
+  });
+  if (ilanList.length === 0) return;
+  downloadIcs(ilanList, "ilan-outlook-schedule.ics");
+};
+
+function parseD(str) {
+  var p = str.split("-");
+  return new Date(
+    parseInt(p[0], 10),
+    parseInt(p[1], 10) - 1,
+    parseInt(p[2], 10),
+    12, 0, 0
+  );
+}
+
+function fmtIso(d) {
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, "0");
+  var day = String(d.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + day;
+}
+
+function getDays(baseStr) {
+  var b = parseD(baseStr);
+  b.setDate(b.getDate() - b.getDay());
+  var out = [];
+  for (var i = 0; i < 5; i++) {
+    var d = new Date(
+      b.getFullYear(),
+      b.getMonth(),
+      b.getDate() + i,
+      12, 0, 0
+    );
+    var y = String(d.getFullYear()).slice(2);
+    var m = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    out.push({
+      iso: fmtIso(d),
+      disp: day + "." + m + "." + y,
+      name: T.days[i]
+    });
+  }
+  return out;
+}
+
+function mins(t) {
+  if (!t) return 0;
+  var p = t.split(":");
+  return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+}
+
+function overlap(s1, e1, s2, e2) {
+  return mins(s1) < mins(e2) && mins(e1) > mins(s2);
+}
+
+window.moveWeek = function(delta) {
+  var d = parseD(S.weekStart);
+  d.setDate(d.getDate() - d.getDay() + delta);
+  S.weekStart = fmtIso(d);
+  S.dayIso = S.weekStart;
+  draw();
+};
+
+window.goTab = function(t) {
+  S.tab = t;
+  draw();
+};
+
+window.pickDay = function(iso) {
+  S.dayIso = iso;
+  draw();
+};
+
+window.openAdd = function(eq, iso) {
+  S.err = "";
+  S.editId = null;
+  S.f = {
+    eq: eq || "controls",
+    date: iso || S.dayIso,
+    st: "10:00",
+    et: "12:00",
+    name: "",
+    exp: "",
+    ilan: false
+  };
+  S.modal = true;
+  draw();
+};
+
+window.openEdit = function(id, ev) {
+  if (ev) ev.stopPropagation();
+  for (var i = 0; i < S.list.length; i++) {
+    var b = S.list[i];
+    if (b.id === id) {
+      S.err = "";
+      S.editId = id;
+      S.f = {
+        eq: b.equipmentId,
+        date: b.date,
+        st: b.startTime,
+        et: b.endTime,
+        name: b.studentName,
+        exp: b.experiment || "",
+        ilan: !!b.needsIlan
+      };
+      S.modal = true;
+      draw();
+      return;
+    }
+  }
+};
+
+window.closeAdd = function() {
+  S.modal = false;
+  S.editId = null;
+  draw();
+};
+
+window.delItem = function(id, ev) {
+  if (ev) ev.stopPropagation();
+  S.deletedIds[id] = true;
+  S.list = S.list.filter(function(x) {
+    return x.id !== id;
+  });
+  saveAndPush();
+};
+
+window.okIlan = function(id) {
+  for (var i = 0; i < S.list.length; i++) {
+    if (S.list[i].id === id) {
+      S.list[i].ilanApproved = !S.list[i].ilanApproved;
+      S.list[i].updatedAt = Date.now();
+    }
+  }
+  saveAndPush();
+};
+
+window.saveForm = function(ev) {
+  ev.preventDefault();
+  var eq = document.getElementById("f_eq").value;
+  var dt = document.getElementById("f_dt").value;
+  var st = document.getElementById("f_st").value;
+  var et = document.getElementById("f_et").value;
+  var nm = document.getElementById("f_nm").value.trim();
+  var ex = document.getElementById("f_ex").value.trim();
+  var il = document.getElementById("f_il").checked;
+
+  S.f = {
+    eq: eq, date: dt, st: st, et: et,
+    name: nm, exp: ex, ilan: il
+  };
+
+  if (!nm) {
+    S.err = T.errN;
+    draw();
+    return;
+  }
+  if (mins(et) <= mins(st)) {
+    S.err = T.errT;
+    draw();
+    return;
+  }
+
+  for (var i = 0; i < S.list.length; i++) {
+    var b = S.list[i];
+    if (S.editId && b.id === S.editId) continue;
+    if (b.date === dt && overlap(st, et, b.startTime, b.endTime)) {
+      if (b.equipmentId === eq) {
+        S.err = T.errE + b.studentName + " (" + b.startTime + "-" + b.endTime + ")";
+        draw();
+        return;
+      }
+      if (il && b.needsIlan) {
+        S.err = T.errI + b.studentName + " (" + b.startTime + "-" + b.endTime + ")";
+        draw();
+        return;
+      }
+    }
+  }
+
+  if (S.editId) {
+    for (var j = 0; j < S.list.length; j++) {
+      if (S.list[j].id === S.editId) {
+        S.list[j].equipmentId = eq;
+        S.list[j].date = dt;
+        S.list[j].startTime = st;
+        S.list[j].endTime = et;
+        S.list[j].studentName = nm;
+        S.list[j].experiment = ex;
+        S.list[j].needsIlan = il;
+        S.list[j].updatedAt = Date.now();
+      }
+    }
+    S.modal = false;
+    S.editId = null;
+    saveAndPush();
+  } else {
+    var newEntry = {
+      id: "id" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+      equipmentId: eq,
+      date: dt,
+      startTime: st,
+      endTime: et,
+      studentName: nm,
+      experiment: ex,
+      needsIlan: il,
+      ilanApproved: false,
+      updatedAt: Date.now()
+    };
+    S.list.push(newEntry);
+    S.modal = false;
+    S.calItem = newEntry;
+    saveAndPush();
+  }
+};
+
+function drawBoardHtml() {
+  var b = '<div class="board-card">';
+  b += '<div class="board-hdr">';
+  b += renderAvatarHtml();
+  b += '<div><div style="font-weight:bold;font-size:16px;color:#78350f">';
+  b += T.boardTitle + '</div>';
+  b += '<div style="font-size:12px;color:#92400e">' + T.boardSub;
+  b += '</div></div></div>';
+
+  for (var i = 0; i < S.notes.length; i++) {
+    var n = S.notes[i];
+    b += '<div class="board-note">';
+    b += '<div style="display:flex;justify-content:space-between;gap:6px">';
+    b += '<span>\ud83d\udccc ' + n.text + '</span>';
+    b += '<button class="del-btn" onclick="delNote(\'' + n.id + '\')">X</button>';
+    b += '</div></div>';
+  }
+
+  b += '<form onsubmit="addNote(event)" style="margin-top:10px">';
+  b += '<textarea id="note_inp" rows="2" placeholder="' + T.addNotePh + '" ';
+  b += 'style="width:100%;padding:8px;border-radius:8px;border:1px solid #fcd34d;font-size:13px"></textarea>';
+  b += '<button type="submit" class="btn-main" ';
+  b += 'style="width:100%;margin-top:6px;background:#d97706">';
+  b += T.addNoteBtn + '</button></form></div>';
+  return b;
+}
+
+function draw() {
+  var days = getDays(S.weekStart);
+  var h = "";
+
+  h += '<div class="hdr">';
+  h += '<div class="hdr-title">';
+  h += renderAvatarHtml();
+  h += '<div><h1>' + T.title + '</h1>';
+  h += '<div class="sync-badge" onclick="pullCloudHistory()">';
+  h += '<span class="dot ' + (S.synced ? 'dot-ok' : 'dot-wait') + '"></span>';
+  h += '<span>' + (S.synced ? T.syncOk : T.syncWait) + '</span></div></div></div>';
+  h += '<button class="btn-main" onclick="openAdd()">';
+  h += T.newBtn + '</button></div>';
+
+  h += '<div class="bar">';
+  h += '<button class="btn-sec" onclick="moveWeek(-7)">';
+  h += T.prevW + '</button>';
+  h += '<div style="text-align:center">';
+  h += '<div style="font-size:12px;color:#64748b">' + T.workW + '</div>';
+  h += '<b style="font-size:16px">' + days[0].disp + ' - ' + days[4].disp + '</b></div>';
+  h += '<button class="btn-sec" onclick="moveWeek(7)">';
+  h += T.nextW + '</button></div>';
+
+  h += '<div class="wrap"><div class="main-layout">';
+  h += '<aside class="board-side">' + drawBoardHtml() + '</aside>';
+  h += '<div class="schedule-side">';
+
+  if (S.tab === "table") {
+    h += '<div class="tbl-box"><table><thead><tr>';
+    h += '<th class="eq-col">' + T.dev + '</th>';
+    for (var d = 0; d < days.length; d++) {
+      h += '<th><div>' + T.day + ' ' + days[d].name + '</div>';
+      h += '<div style="font-size:13px;color:#64748b;font-weight:normal">';
+      h += days[d].disp + '</div></th>';
+    }
+    h += '</tr></thead><tbody>';
+
+    for (var e = 0; e < EQ.length; e++) {
+      var eq = EQ[e];
+      h += '<tr><td class="eq-col">' + eq.name + '</td>';
+      for (var k = 0; k < days.length; k++) {
+        var dy = days[k];
+        h += '<td class="cell" onclick="openAdd(\'';
+        h += eq.id + '\',\'' + dy.iso + '\')">';
+        var cellItems = S.list.filter(function(x) {
+          return x.equipmentId === eq.id && x.date === dy.iso;
+        }).sort(function(a, b) {
+          return mins(a.startTime) - mins(b.startTime);
+        });
+        for (var j = 0; j < cellItems.length; j++) {
+          var b = cellItems[j];
+          h += '<div class="item ' + eq.cls + '" ';
+          h += 'onclick="openEdit(\'' + b.id + '\',event)">';
+          h += '<div class="row-top"><span>';
+          h += b.startTime + '-' + b.endTime + '</span>';
+          h += '<div class="act-btns">';
+          h += '<button class="cal-mini" onclick="openEdit(\'';
+          h += b.id + '\',event)" title="ערוך">\u270e</button>';
+          h += '<button class="cal-mini" onclick="openCalModal(\'';
+          h += b.id + '\',event)" title="הוסף ליומן">\ud83d\udcc5+</button>';
+          h += '<button class="del-btn" onclick="delItem(\'';
+          h += b.id + '\',event)" title="מחק">X</button></div></div>';
+          h += '<div style="font-size:14px"><b>' + b.studentName + '</b></div>';
+          if (b.experiment) {
+            h += '<div style="margin-top:2px">' + b.experiment + '</div>';
+          }
+          if (b.needsIlan) {
+            var tc = b.ilanApproved ? "tag-ok" : "tag-wait";
+            var tt = b.ilanApproved ? T.ilanOk : T.needIlan;
+            h += '<span class="tag ' + tc + '">' + tt + '</span>';
+          }
+          h += '</div>';
+        }
+        h += '<div class="add-hint">' + T.add + '</div></td>';
+      }
+      h += '</tr>';
+    }
+    h += '</tbody></table></div>';
+  } else if (S.tab === "daily") {
+    h += '<div class="days-grid">';
+    for (var i = 0; i < days.length; i++) {
+      var act = S.dayIso === days[i].iso ? " active" : "";
+      h += '<button class="day-btn' + act + '" ';
+      h += 'onclick="pickDay(\'' + days[i].iso + '\')">';
+      h += '<div>' + T.day + ' ' + days[i].name + '</div>';
+      h += '<div>' + days[i].disp.slice(0, 5) + '</div></button>';
+    }
+    h += '</div>';
+
+    for (var m = 0; m < EQ.length; m++) {
+      var eq2 = EQ[m];
+      h += '<div class="card"><div class="row-top" ';
+      h += 'style="margin-bottom:8px"><span>' + eq2.name + '</span>';
+      h += '<button class="btn-sec" onclick="openAdd(\'';
+      h += eq2.id + '\',\'' + S.dayIso + '\')">';
+      h += T.add + '</button></div>';
+      var cnt = 0;
+      for (var n = 0; n < S.list.length; n++) {
+        var b2 = S.list[n];
+        if (b2.date === S.dayIso && b2.equipmentId === eq2.id) {
+          cnt++;
+          h += '<div class="item ' + eq2.cls + '" onclick="openEdit(\'' + b2.id + '\',event)">';
+          h += '<div class="row-top"><span>' + b2.startTime;
+          h += '-' + b2.endTime + ' | ' + b2.studentName + '</span>';
+          h += '<div class="act-btns">';
+          h += '<button class="cal-mini" onclick="openEdit(\'';
+          h += b2.id + '\',event)">' + T.edit + '</button>';
+          h += '<button class="cal-mini" onclick="openCalModal(\'';
+          h += b2.id + '\',event)">\ud83d\udcc5+</button>';
+          h += '<button class="del-btn" onclick="delItem(\'';
+          h += b2.id + '\',event)">' + T.del + '</button></div></div>';
+          if (b2.experiment) h += '<div>' + b2.experiment + '</div>';
+          h += '</div>';
+        }
+      }
+      if (cnt === 0) {
+        h += '<div style="font-size:13px;color:#94a3b8">';
+        h += T.free + '</div>';
+      }
+      h += '</div>';
+    }
+  } else {
+    h += '<div class="card" style="background:#fffbeb;border-color:#f59e0b">';
+    h += '<div style="display:flex;align-items:center;gap:12px">';
+    h += renderAvatarHtml();
+    h += '<b style="font-size:17px">' + T.ilanTitle + '</b></div>';
+    h += '<button class="btn-cal" onclick="dlIlanAllIcs()">';
+    h += T.ilanAllCal + '</button></div>';
+
+    for (var p = 0; p < days.length; p++) {
+      var dObj = days[p];
+      h += '<div class="card"><b>' + T.day + ' ' + dObj.name;
+      h += ' (' + dObj.disp + ')</b><hr style="border:0;';
+      h += 'border-top:1px solid #e2e8f0;margin:8px 0">';
+      var ic = 0;
+      for (var q = 0; q < S.list.length; q++) {
+        var b3 = S.list[q];
+        if (b3.date === dObj.iso && b3.needsIlan) {
+          ic++;
+          h += '<div class="item" style="display:flex;';
+          h += 'justify-content:space-between;align-items:center">';
+          h += '<div onclick="openEdit(\'' + b3.id + '\',event)"><b>' + b3.startTime + '-' + b3.endTime + '</b> ';
+          h += ' | ' + b3.studentName + ' (' + getEqName(b3.equipmentId) + ')';
+          if (b3.experiment) h += '<div>' + b3.experiment + '</div>';
+          h += '</div><div style="display:flex;gap:6px;align-items:center">';
+          h += '<button class="cal-mini" onclick="openEdit(\'';
+          h += b3.id + '\',event)">\u270e</button>';
+          h += '<button class="cal-mini" onclick="openCalModal(\'';
+          h += b3.id + '\',event)">\ud83d\udcc5+</button>';
+          h += '<button class="btn-main" ';
+          h += 'style="background:' + (b3.ilanApproved ? '#059669' : '#f59e0b');
+          h += '" onclick="okIlan(\'' + b3.id + '\')">';
+          h += (b3.ilanApproved ? T.ilanOk : T.appBtn);
+          h += '</button></div></div>';
+        }
+      }
+      if (ic === 0) {
+        h += '<div style="font-size:13px;color:#94a3b8">';
+        h += T.noIlan + '</div>';
+      }
+      h += '</div>';
+    }
+  }
+
+  h += '</div></div></div>';
+
+  if (S.modal) {
+    h += '<div class="modal-bg"><div class="modal">';
+    h += '<div class="row-top" style="margin-bottom:12px">';
+    h += '<b style="font-size:16px">' + (S.editId ? T.mTitleEdit : T.mTitleNew) + '</b>';
+    h += '<button class="del-btn" onclick="closeAdd()">X</button></div>';
+    if (S.err) h += '<div class="err">' + S.err + '</div>';
+    h += '<form onsubmit="saveForm(event)">';
+    h += '<div class="field"><label>' + T.dev + '</label>';
+    h += '<select id="f_eq">';
+    for (var x = 0; x < EQ.length; x++) {
+      var sel = S.f.eq === EQ[x].id ? " selected" : "";
+      h += '<option value="' + EQ[x].id + '"' + sel + '>';
+      h += EQ[x].name + '</option>';
+    }
+    h += '</select></div>';
+
+    h += '<div class="field"><label>' + T.dLbl + '</label>';
+    h += '<select id="f_dt">';
+    var foundDay = false;
+    for (var y = 0; y < days.length; y++) {
+      var selD = S.f.date === days[y].iso ? " selected" : "";
+      if (selD) foundDay = true;
+      h += '<option value="' + days[y].iso + '"' + selD + '>';
+      h += T.day + ' ' + days[y].name + ' - ' + days[y].disp + '</option>';
+    }
+    if (!foundDay && S.f.date) {
+      h += '<option value="' + S.f.date + '" selected>' + S.f.date + '</option>';
+    }
+    h += '</select></div>';
+
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+    h += '<div class="field"><label>' + T.sLbl + '</label>';
+    h += '<select id="f_st">';
+    for (var ts1 = 0; ts1 < TIMES.length; ts1++) {
+      var selS = S.f.st === TIMES[ts1] ? " selected" : "";
+      h += '<option value="' + TIMES[ts1] + '"' + selS + '>' + TIMES[ts1] + '</option>';
+    }
+    h += '</select></div>';
+
+    h += '<div class="field"><label>' + T.eLbl + '</label>';
+    h += '<select id="f_et">';
+    for (var ts2 = 0; ts2 < TIMES.length; ts2++) {
+      var selE = S.f.et === TIMES[ts2] ? " selected" : "";
+      h += '<option value="' + TIMES[ts2] + '"' + selE + '>' + TIMES[ts2] + '</option>';
+    }
+    h += '</select></div></div>';
+
+    h += '<div class="field"><label>' + T.stLbl + '</label>';
+    h += '<input id="f_nm" type="text" value="' + S.f.name + '" required></div>';
+    h += '<div class="field"><label>' + T.exLbl + '</label>';
+    h += '<input id="f_ex" type="text" value="' + S.f.exp + '"></div>';
+
+    var chk = S.f.ilan ? " checked" : "";
+    h += '<div class="field"><label style="background:#fffbeb;padding:10px;border-radius:8px;border:1px solid #f59e0b;cursor:pointer">';
+    h += '<input id="f_il" type="checkbox"' + chk + '> ' + T.chkIlan + '</label></div>';
+
+    h += '<button type="submit" class="btn-main" ';
+    h += 'style="width:100%">' + (S.editId ? T.saveChanges : T.save) + '</button>';
+    h += '</form></div></div>';
+  }
+
+  if (S.calItem) {
+    var gUrl = makeGCalUrl(S.calItem);
+    var outUrl = makeOutlookWebUrl(S.calItem);
+    h += '<div class="modal-bg"><div class="modal">';
+    h += '<div class="row-top" style="margin-bottom:12px">';
+    h += '<b style="font-size:16px">' + T.calTitle + '</b>';
+    h += '<button class="del-btn" onclick="closeCalModal()">X</button></div>';
+    h += '<div style="font-size:14px;margin-bottom:14px;background:#f8fafc;padding:10px;border-radius:8px">';
+    h += '<b>' + getEqName(S.calItem.equipmentId) + '</b> | ';
+    h += S.calItem.studentName + '<br>';
+    h += S.calItem.date + ' (' + S.calItem.startTime + '-';
+    h += S.calItem.endTime + ')</div>';
+    h += '<button class="btn-main" style="width:100%;margin-bottom:8px;';
+    h += 'background:#0078d4" onclick="dlSingleIcs(\'';
+    h += S.calItem.id + '\')">' + T.outIcs + '</button>';
+    h += '<a href="' + outUrl + '" target="_blank" class="btn-main" ';
+    h += 'style="width:100%;margin-bottom:8px;background:#0f172a">';
+    h += T.outWeb + '</a>';
+    h += '<a href="' + gUrl + '" target="_blank" class="btn-main" ';
+    h += 'style="width:100%;margin-bottom:8px;background:#059669">';
+    h += T.gCal + '</a>';
+    h += '<button class="btn-sec" style="width:100%;padding:10px" ';
+    h += 'onclick="closeCalModal()">' + T.cancel + '</button>';
+    h += '</div></div>';
+  }
+
+  h += '<nav class="nav">';
+  h += '<button class="' + (S.tab === "table" ? "active" : "") + '" ';
+  h += 'onclick="goTab(\'table\')">' + T.t1 + '</button>';
+  h += '<button class="' + (S.tab === "daily" ? "active" : "") + '" ';
+  h += 'onclick="goTab(\'daily\')">' + T.t2 + '</button>';
+  h += '<button class="' + (S.tab === "ilan" ? "active" : "") + '" ';
+  h += 'onclick="goTab(\'ilan\')">' + T.t3 + '</button>';
+  h += '</nav>';
+
+  document.getElementById("app").innerHTML = h;
+}
+
+draw();
+pullCloudHistory();
+setInterval(pullCloudHistory, 4000);
+</script>
+</body>
+</html>
