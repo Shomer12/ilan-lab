@@ -22,21 +22,25 @@
   .bar { background: #fff; border-bottom: 1px solid #cbd5e1; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
   .btn-sec { background: #e2e8f0; border: 0; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; color: #1e293b; }
   .btn-sec:hover { background: #cbd5e1; }
-  .wrap { padding: 20px; max-width: 1650px; margin: 0 auto; }
-  .main-layout { display: flex; flex-direction: column; gap: 20px; }
-  @media (min-width: 1024px) {
+  .wrap { padding: 18px; max-width: 1820px; margin: 0 auto; }
+  .main-layout { display: flex; flex-direction: column; gap: 18px; }
+  @media (min-width: 1150px) {
     .main-layout { flex-direction: row; align-items: flex-start; }
-    .board-side { width: 330px; flex-shrink: 0; position: sticky; top: 85px; }
+    .board-side { width: 290px; flex-shrink: 0; position: sticky; top: 85px; }
     .schedule-side { flex: 1; min-width: 0; }
+    .ra-side { width: 300px; flex-shrink: 0; position: sticky; top: 85px; }
   }
-  .board-card { background: #fffbeb; border: 2px solid #f59e0b; border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(245,158,11,0.1); }
-  .board-hdr { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #fde68a; padding-bottom: 12px; margin-bottom: 12px; }
-  .board-note { background: #fff; border: 1px solid #fde68a; border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 14px; line-height: 1.4; }
+  .board-card { background: #fffbeb; border: 2px solid #f59e0b; border-radius: 16px; padding: 15px; box-shadow: 0 4px 12px rgba(245,158,11,0.1); }
+  .ra-card { background: #f5f3ff; border: 2px solid #8b5cf6; border-radius: 16px; padding: 15px; box-shadow: 0 4px 12px rgba(139,92,246,0.1); }
+  .board-hdr { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #fde68a; padding-bottom: 10px; margin-bottom: 12px; }
+  .ra-hdr { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ddd6fe; padding-bottom: 10px; margin-bottom: 12px; }
+  .board-note { background: #fff; border: 1px solid #fde68a; border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 13.5px; line-height: 1.4; }
+  .ra-item { background: #fff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 11px; margin-bottom: 10px; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
   .tbl-box { background: #fff; border-radius: 16px; border: 1px solid #cbd5e1; overflow-x: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-  table { width: 100%; border-collapse: collapse; min-width: 920px; font-size: 15px; }
-  th, td { border-left: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; padding: 12px; vertical-align: top; }
-  th { background: #f8fafc; text-align: center; font-size: 16px; padding: 14px 10px; }
-  .eq-col { background: #f8fafc; font-weight: bold; width: 150px; text-align: right; font-size: 16px; }
+  table { width: 100%; border-collapse: collapse; min-width: 860px; font-size: 14.5px; }
+  th, td { border-left: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; padding: 10px; vertical-align: top; }
+  th { background: #f8fafc; text-align: center; font-size: 15.5px; padding: 12px 8px; }
+  .eq-col { background: #f8fafc; font-weight: bold; width: 135px; text-align: right; font-size: 15px; }
   .cell { cursor: pointer; min-height: 125px; width: 18%; transition: background 0.15s; }
   .cell:hover { background: #f1f5f9; }
   .item { padding: 8px 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #cbd5e1; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s; }
@@ -51,16 +55,19 @@
   .act-btns { display: flex; gap: 3px; align-items: center; }
   .del-btn { background: rgba(255,255,255,0.8); border: 1px solid #fca5a5; border-radius: 5px; color: #dc2626; font-weight: bold; cursor: pointer; padding: 1px 5px; font-size: 11px; }
   .cal-mini { background: rgba(255,255,255,0.85); border: 1px solid #94a3b8; border-radius: 5px; font-size: 11px; padding: 1px 5px; cursor: pointer; font-weight: bold; color: #0f172a; }
-  .tag { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #fff; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; margin-left: 4px; padding: 2px 7px; border-radius: 6px; font-size: 11.5px; font-weight: bold; color: #fff; }
   .tag-wait { background: #f59e0b; }
   .tag-ok { background: #059669; }
+  .tag-ra-open { background: #7c3aed; }
+  .tag-ra-full { background: #0d9488; }
+  .ra-chip { display: inline-flex; align-items: center; gap: 3px; background: rgba(255,255,255,0.85); border: 1px solid #c4b5fd; color: #4c1d95; border-radius: 5px; padding: 1px 6px; font-size: 11px; font-weight: bold; margin: 3px 0 0 3px; }
   .add-hint { color: #94a3b8; font-size: 12px; text-align: center; padding: 8px 0; font-weight: 600; }
-  .nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #cbd5e1; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 30; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-  .nav button { background: none; border: 0; padding: 14px 6px; font-weight: bold; font-size: 14px; color: #64748b; cursor: pointer; }
+  .nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #cbd5e1; display: grid; grid-template-columns: repeat(4, 1fr); z-index: 30; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+  .nav button { background: none; border: 0; padding: 12px 4px; font-weight: bold; font-size: 13px; color: #64748b; cursor: pointer; }
   .nav button.active { color: #2563eb; border-top: 3px solid #2563eb; background: #f8fafc; }
   .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
-  .modal { background: #fff; border-radius: 16px; max-width: 440px; width: 100%; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-  .field { margin-bottom: 12px; }
+  .modal { background: #fff; border-radius: 16px; max-width: 440px; width: 100%; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 92vh; overflow-y: auto; }
+  .field { margin-bottom: 11px; }
   .field label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; }
   .field input, .field select, .field textarea { width: 100%; padding: 9px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #fff; }
   .err { background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-bottom: 12px; }
@@ -150,12 +157,23 @@ var T = {
   stLbl: "\u05e9\u05dd \u05d4\u05e1\u05d8\u05d5\u05d3\u05e0\u05d8",
   exLbl: "\u05ea\u05d9\u05d0\u05d5\u05e8 \u05e0\u05d9\u05e1\u05d5\u05d9 / \u05e4\u05d9\u05e8\u05d5\u05d8 \u05de\u05db\u05e9\u05d9\u05e8",
   chkIlan: "\u05e6\u05e8\u05d9\u05da \u05e2\u05d6\u05e8\u05d4 \u05e9\u05dc \u05d0\u05d9\u05dc\u05df \u05d1\u05e9\u05e2\u05d5\u05ea \u05d0\u05dc\u05d5",
+  raLbl: "\ud83e\uddd1\u200d\ud83d\udd2c \u05db\u05de\u05d4 \u05e2\u05d5\u05d6\u05e8\u05d9 \u05de\u05d7\u05e7\u05e8 \u05d3\u05e8\u05d5\u05e9\u05d9\u05dd \u05dc\u05d0\u05d9\u05e8\u05d5\u05e2?",
+  raNone: "\u05dc\u05dc\u05d0 \u05e2\u05d5\u05d6\u05e8\u05d9 \u05de\u05d7\u05e7\u05e8 (0)",
+  raSideTitle: "\ud83e\uddd1\u200d\ud83d\udd2c \u05d3\u05e8\u05d5\u05e9\u05d9\u05dd \u05e2\u05d5\u05d6\u05e8\u05d9 \u05de\u05d7\u05e7\u05e8",
+  raSideSub: "\u05dc\u05d7\u05e5 \u05dc\u05e9\u05d9\u05d1\u05d5\u05e5 \u05e2\u05e6\u05de\u05da \u05db\u05e2\u05d5\u05d6\u05e8 \u05de\u05d7\u05e7\u05e8 \u05d1\u05e0\u05d9\u05e1\u05d5\u05d9",
+  raEmpty: "\u05d0\u05d9\u05df \u05db\u05e8\u05d2\u05e2 \u05d0\u05d9\u05e8\u05d5\u05e2\u05d9\u05dd \u05d4\u05d3\u05d5\u05e8\u05e9\u05d9\u05dd \u05e2\u05d5\u05d6\u05e8\u05d9 \u05de\u05d7\u05e7\u05e8 \u05d1\u05e9\u05d1\u05d5\u05e2 \u05d6\u05d4.",
+  raJoinBtn: "\u270b \u05d4\u05d9\u05e8\u05e9\u05dd \u05db\u05e2\u05d5\u05d6\u05e8 \u05de\u05d7\u05e7\u05e8",
+  raFullBadge: "\u2713 \u05d4\u05de\u05db\u05e1\u05d4 \u05de\u05dc\u05d0\u05d4",
+  raModalTitle: "\u05d4\u05e8\u05e9\u05de\u05d4 \u05db\u05e2\u05d5\u05d6\u05e8/\u05ea \u05de\u05d7\u05e7\u05e8 \u05dc\u05d0\u05d9\u05e8\u05d5\u05e2",
+  raNamePh: "\u05d4\u05d6\u05df \u05d0\u05ea \u05e9\u05de\u05da \u05d4\u05de\u05dc\u05d0...",
+  raTagPrefix: "\ud83e\uddd1\u200d\ud83d\udd2c \u05e2\u05d5\u05d6\u05e8\u05d9\u05dd: ",
   save: "\u05e9\u05de\u05d5\u05e8 \u05e9\u05d9\u05d1\u05d5\u05e5",
   saveChanges: "\u05e9\u05de\u05d5\u05e8 \u05e9\u05d9\u05e0\u05d5\u05d9\u05d9\u05dd",
   cancel: "\u05e1\u05d2\u05d5\u05e8",
-  t1: "\ud83d\udcc5 \u05d8\u05d1\u05dc\u05d4 \u05e9\u05d1\u05d5\u05e2\u05d9\u05ea",
-  t2: "\ud83d\udcf1 \u05d9\u05d5\u05de\u05df \u05d9\u05d5\u05de\u05d9",
-  t3: "\u05d4\u05dc\u05d5\"\u05d6 \u05e9\u05dc \u05d0\u05d9\u05dc\u05df",
+  t1: "\ud83d\udcc5 \u05d8\u05d1\u05dc\u05d4",
+  t2: "\ud83d\udcf1 \u05d9\u05d5\u05de\u05d9",
+  t3: "\ud83d\udc77\u200d\u2642\ufe0f \u05d0\u05d9\u05dc\u05df",
+  t4: "\ud83e\uddd1\u200d\ud83d\udd2c \u05e2\u05d5\u05d6\u05e8\u05d9 \u05de\u05d7\u05e7\u05e8",
   errN: "\u05e0\u05d0 \u05dc\u05d4\u05d6\u05d9\u05df \u05e9\u05dd",
   errT: "\u05e9\u05e2\u05ea \u05e1\u05d9\u05d5\u05dd \u05d7\u05d9\u05d9\u05d1\u05ea \u05dc\u05d4\u05d9\u05d5\u05ea \u05d0\u05d7\u05e8\u05d9 \u05d4\u05ea\u05d7\u05dc\u05d4",
   errE: "\u05d4\u05de\u05db\u05e9\u05d9\u05e8 \u05ea\u05e4\u05d5\u05e1 \u05e2\u05dc \u05d9\u05d3\u05d9 ",
@@ -197,49 +215,49 @@ var INIT = [
     id: "1", equipmentId: "controls", date: "2026-10-25",
     startTime: "13:00", endTime: "20:00",
     studentName: T.ido, experiment: T.exp1,
-    needsIlan: false, ilanApproved: false
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
   },
   {
     id: "2", equipmentId: "controls", date: "2026-10-26",
     startTime: "08:00", endTime: "10:00",
     studentName: T.alon, experiment: T.exp2,
-    needsIlan: false, ilanApproved: false
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
   },
   {
     id: "3", equipmentId: "casting", date: "2026-10-26",
     startTime: "10:00", endTime: "13:00",
     studentName: T.bar, experiment: T.exp3,
-    needsIlan: true, ilanApproved: true
+    needsIlan: true, ilanApproved: true, raNeeded: 2, raList: []
   },
   {
     id: "4", equipmentId: "polishing", date: "2026-10-26",
     startTime: "10:00", endTime: "12:00",
     studentName: T.alon, experiment: T.exp4,
-    needsIlan: false, ilanApproved: false
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
   },
   {
     id: "5", equipmentId: "casting", date: "2026-10-29",
     startTime: "10:00", endTime: "13:00",
     studentName: T.bar, experiment: T.exp5,
-    needsIlan: true, ilanApproved: false
+    needsIlan: true, ilanApproved: false, raNeeded: 2, raList: []
   },
   {
     id: "6", equipmentId: "controls", date: "2026-11-01",
     startTime: "09:00", endTime: "11:00",
     studentName: T.ortalGabi, experiment: T.expCubes,
-    needsIlan: false, ilanApproved: false
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
   },
   {
     id: "7", equipmentId: "controls", date: "2026-11-03",
     startTime: "10:00", endTime: "12:00",
     studentName: T.ortalGabi, experiment: T.expCubes,
-    needsIlan: false, ilanApproved: false
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
   },
   {
     id: "8", equipmentId: "actuators", date: "2026-11-01",
     startTime: "09:00", endTime: "11:00",
     studentName: T.dobi, experiment: T.expFlex,
-    needsIlan: false, ilanApproved: false
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
   }
 ];
 
@@ -248,7 +266,7 @@ function loadMergedBookings() {
   for (var i = 0; i < INIT.length; i++) {
     map[INIT[i].id] = INIT[i];
   }
-  var keys = ["lab_v5", "lab_v6", "lab_v7", "lab_v8", "lab_v9", "lab_v10"];
+  var keys = ["lab_v5", "lab_v6", "lab_v7", "lab_v8", "lab_v9", "lab_v10", "lab_v11"];
   for (var k = 0; k < keys.length; k++) {
     try {
       var raw = localStorage.getItem(keys[k]);
@@ -267,6 +285,9 @@ function loadMergedBookings() {
               experiment: it.experiment || it.exp || "",
               needsIlan: !!(it.needsIlan || it.ilan),
               ilanApproved: !!(it.ilanApproved || it.ok),
+              raNeeded: Number(it.raNeeded || 0),
+              raList: Array.isArray(it.raList) ? it.raList : [],
+              updatedAt: it.updatedAt || 0,
               deleted: !!it.deleted
             };
             map[norm.id] = norm;
@@ -297,12 +318,14 @@ var S = {
   list: loadMergedBookings(),
   deletedIds: JSON.parse(localStorage.getItem("lab_del_v10") || "{}"),
   notes: loadNotes(),
+  draftNote: "",
   customAvatar: localStorage.getItem("ilan_avatar_img") || "",
   synced: false,
-  cloudUrl: localStorage.getItem("lab_custom_cloud") || "https://ntfy.sh/bgu_ilan_lab_sync_2026_v10",
   modal: false,
   editId: null,
   calItem: null,
+  raModalId: null,
+  raDraftName: "",
   err: "",
   f: {
     eq: "controls",
@@ -311,9 +334,17 @@ var S = {
     et: "12:00",
     name: "",
     exp: "",
-    ilan: false
+    ilan: false,
+    raNeeded: 0
   }
 };
+
+function isUserTyping() {
+  var el = document.activeElement;
+  if (!el) return false;
+  var tag = el.tagName ? el.tagName.toLowerCase() : "";
+  return tag === "input" || tag === "textarea" || tag === "select";
+}
 
 function renderAvatarHtml() {
   var inner = S.customAvatar ? ('<img src="' + S.customAvatar + '" alt="Ilan">') : ILAN_SVG;
@@ -348,13 +379,13 @@ window.uploadAvatarFile = function(ev) {
 
 function saveLocalOnly() {
   try {
+    localStorage.setItem("lab_v11", JSON.stringify(S.list));
     localStorage.setItem("lab_v10", JSON.stringify(S.list));
     localStorage.setItem("lab_del_v10", JSON.stringify(S.deletedIds));
     localStorage.setItem("lab_notes_v1", JSON.stringify(S.notes));
   } catch (e) {}
 }
 
-// סנכרון ענן בזמן אמת דרך שרת פומבי פתוח (ntfy pub/sub JSON stream) ללא צורך בהרשמה
 function pushCloud() {
   var payload = {
     ts: Date.now(),
@@ -366,9 +397,9 @@ function pushCloud() {
     method: "POST",
     body: JSON.stringify(payload)
   }).then(function(res) {
-    if (res.ok) {
+    if (res.ok && !S.synced) {
       S.synced = true;
-      draw();
+      if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
     }
   }).catch(function() {});
 }
@@ -398,6 +429,8 @@ function mergeRemoteState(remote) {
   for (var j = 0; j < remote.list.length; j++) {
     var rb = remote.list[j];
     if (rb && rb.id && !S.deletedIds[rb.id]) {
+      rb.raNeeded = Number(rb.raNeeded || 0);
+      rb.raList = Array.isArray(rb.raList) ? rb.raList : [];
       var existing = map[rb.id];
       if (!existing || (rb.updatedAt || 0) >= (existing.updatedAt || 0)) {
         if (JSON.stringify(existing) !== JSON.stringify(rb)) {
@@ -421,11 +454,12 @@ function mergeRemoteState(remote) {
 
   if (changed) {
     saveLocalOnly();
-    if (!S.modal && !S.calItem) draw();
+    if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
   }
 }
 
 function pullCloudHistory() {
+  if (isUserTyping() || S.modal || S.calItem || S.raModalId) return;
   fetch("https://ntfy.sh/bgu_ilan_lab_sync_2026_v10/json?poll=1&since=48h")
     .then(function(res) { return res.text(); })
     .then(function(text) {
@@ -440,8 +474,10 @@ function pullCloudHistory() {
           }
         } catch (e) {}
       }
-      S.synced = true;
-      if (!S.modal && !S.calItem) draw();
+      if (!S.synced) {
+        S.synced = true;
+        if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
+      }
     }).catch(function() {});
 }
 
@@ -451,14 +487,23 @@ function saveAndPush() {
   pushCloud();
 }
 
+window.onNoteInput = function(val) {
+  S.draftNote = val;
+};
+
 window.addNote = function(ev) {
   ev.preventDefault();
-  var inp = document.getElementById("note_inp");
-  if (!inp || !inp.value.trim()) return;
+  var text = (S.draftNote || "").trim();
+  if (!text) {
+    var inp = document.getElementById("note_inp");
+    if (inp) text = inp.value.trim();
+  }
+  if (!text) return;
   S.notes.unshift({
     id: "n" + Date.now(),
-    text: inp.value.trim()
+    text: text
   });
+  S.draftNote = "";
   saveAndPush();
 };
 
@@ -466,6 +511,51 @@ window.delNote = function(id) {
   S.notes = S.notes.filter(function(n) {
     return n.id !== id;
   });
+  saveAndPush();
+};
+
+window.openRaJoin = function(bookingId, ev) {
+  if (ev) ev.stopPropagation();
+  S.raModalId = bookingId;
+  S.raDraftName = localStorage.getItem("last_ra_name") || "";
+  draw();
+};
+
+window.closeRaJoin = function() {
+  S.raModalId = null;
+  draw();
+};
+
+window.submitRaJoin = function(ev) {
+  ev.preventDefault();
+  var inp = document.getElementById("ra_name_inp");
+  var name = inp ? inp.value.trim() : "";
+  if (!name) return;
+  try { localStorage.setItem("last_ra_name", name); } catch (e) {}
+
+  for (var i = 0; i < S.list.length; i++) {
+    var b = S.list[i];
+    if (b.id === S.raModalId) {
+      if (!Array.isArray(b.raList)) b.raList = [];
+      if (b.raList.indexOf(name) === -1 && b.raList.length < (b.raNeeded || 0)) {
+        b.raList.push(name);
+        b.updatedAt = Date.now();
+      }
+    }
+  }
+  S.raModalId = null;
+  saveAndPush();
+};
+
+window.removeRaHelper = function(bookingId, helperName, ev) {
+  if (ev) ev.stopPropagation();
+  for (var i = 0; i < S.list.length; i++) {
+    var b = S.list[i];
+    if (b.id === bookingId && Array.isArray(b.raList)) {
+      b.raList = b.raList.filter(function(x) { return x !== helperName; });
+      b.updatedAt = Date.now();
+    }
+  }
   saveAndPush();
 };
 
@@ -654,7 +744,8 @@ window.openAdd = function(eq, iso) {
     et: "12:00",
     name: "",
     exp: "",
-    ilan: false
+    ilan: false,
+    raNeeded: 0
   };
   S.modal = true;
   draw();
@@ -674,7 +765,8 @@ window.openEdit = function(id, ev) {
         et: b.endTime,
         name: b.studentName,
         exp: b.experiment || "",
-        ilan: !!b.needsIlan
+        ilan: !!b.needsIlan,
+        raNeeded: Number(b.raNeeded || 0)
       };
       S.modal = true;
       draw();
@@ -717,10 +809,11 @@ window.saveForm = function(ev) {
   var nm = document.getElementById("f_nm").value.trim();
   var ex = document.getElementById("f_ex").value.trim();
   var il = document.getElementById("f_il").checked;
+  var ra = parseInt(document.getElementById("f_ra").value, 10) || 0;
 
   S.f = {
     eq: eq, date: dt, st: st, et: et,
-    name: nm, exp: ex, ilan: il
+    name: nm, exp: ex, ilan: il, raNeeded: ra
   };
 
   if (!nm) {
@@ -761,6 +854,8 @@ window.saveForm = function(ev) {
         S.list[j].studentName = nm;
         S.list[j].experiment = ex;
         S.list[j].needsIlan = il;
+        S.list[j].raNeeded = ra;
+        if (!Array.isArray(S.list[j].raList)) S.list[j].raList = [];
         S.list[j].updatedAt = Date.now();
       }
     }
@@ -778,6 +873,8 @@ window.saveForm = function(ev) {
       experiment: ex,
       needsIlan: il,
       ilanApproved: false,
+      raNeeded: ra,
+      raList: [],
       updatedAt: Date.now()
     };
     S.list.push(newEntry);
@@ -786,6 +883,25 @@ window.saveForm = function(ev) {
     saveAndPush();
   }
 };
+
+function renderBookingRaBadges(b) {
+  var need = Number(b.raNeeded || 0);
+  if (need <= 0) return "";
+  var arr = Array.isArray(b.raList) ? b.raList : [];
+  var isFull = arr.length >= need;
+  var cls = isFull ? "tag-ra-full" : "tag-ra-open";
+  var h = '<div><span class="tag ' + cls + '" onclick="openRaJoin(\'' + b.id + '\',event)">';
+  h += T.raTagPrefix + arr.length + '/' + need + (isFull ? '' : ' (+)') + '</span></div>';
+  if (arr.length > 0) {
+    h += '<div style="margin-top:3px">';
+    for (var i = 0; i < arr.length; i++) {
+      h += '<span class="ra-chip" onclick="event.stopPropagation()">' + arr[i];
+      h += ' <b style="color:#dc2626;cursor:pointer" onclick="removeRaHelper(\'' + b.id + '\',\'' + arr[i].replace(/'/g, "") + '\',event)">x</b></span>';
+    }
+    h += '</div>';
+  }
+  return h;
+}
 
 function drawBoardHtml() {
   var b = '<div class="board-card">';
@@ -807,11 +923,69 @@ function drawBoardHtml() {
 
   b += '<form onsubmit="addNote(event)" style="margin-top:10px">';
   b += '<textarea id="note_inp" rows="2" placeholder="' + T.addNotePh + '" ';
-  b += 'style="width:100%;padding:8px;border-radius:8px;border:1px solid #fcd34d;font-size:13px"></textarea>';
+  b += 'oninput="onNoteInput(this.value)" ';
+  b += 'style="width:100%;padding:8px;border-radius:8px;border:1px solid #fcd34d;font-size:13px">' + (S.draftNote || "") + '</textarea>';
   b += '<button type="submit" class="btn-main" ';
   b += 'style="width:100%;margin-top:6px;background:#d97706">';
   b += T.addNoteBtn + '</button></form></div>';
   return b;
+}
+
+function drawRaSideHtml(days) {
+  var dayMap = {};
+  for (var d = 0; d < days.length; d++) {
+    dayMap[days[d].iso] = days[d];
+  }
+
+  var raEvents = S.list.filter(function(b) {
+    return Number(b.raNeeded || 0) > 0 && dayMap[b.date];
+  }).sort(function(a, b) {
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    return mins(a.startTime) - mins(b.startTime);
+  });
+
+  var h = '<div class="ra-card">';
+  h += '<div class="ra-hdr">';
+  h += '<div style="width:42px;height:42px;border-radius:50%;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">\ud83e\uddd1\u200d\ud83d\udd2c</div>';
+  h += '<div><div style="font-weight:bold;font-size:16px;color:#4c1d95">' + T.raSideTitle + '</div>';
+  h += '<div style="font-size:12px;color:#6d28d9">' + T.raSideSub + '</div></div></div>';
+
+  if (raEvents.length === 0) {
+    h += '<div style="font-size:13px;color:#64748b;padding:8px 0">' + T.raEmpty + '</div>';
+  } else {
+    for (var i = 0; i < raEvents.length; i++) {
+      var ev = raEvents[i];
+      var dInfo = dayMap[ev.date];
+      var arr = Array.isArray(ev.raList) ? ev.raList : [];
+      var need = Number(ev.raNeeded || 0);
+      var full = arr.length >= need;
+
+      h += '<div class="ra-item">';
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+      h += '<b style="color:#4c1d95">' + getEqName(ev.equipmentId) + '</b>';
+      h += '<span class="tag ' + (full ? 'tag-ra-full' : 'tag-ra-open') + '" style="margin:0">' + arr.length + '/' + need + '</span>';
+      h += '</div>';
+      h += '<div style="font-size:12.5px;font-weight:bold">' + T.day + ' ' + dInfo.name + ' (' + dInfo.disp + ') | ' + ev.startTime + '-' + ev.endTime + '</div>';
+      h += '<div style="font-size:12.5px;margin-top:2px">' + ev.studentName + (ev.experiment ? ' - ' + ev.experiment : '') + '</div>';
+
+      if (arr.length > 0) {
+        h += '<div style="margin-top:6px">';
+        for (var r = 0; r < arr.length; r++) {
+          h += '<span class="ra-chip">' + arr[r] + ' <b style="color:#dc2626;cursor:pointer" onclick="removeRaHelper(\'' + ev.id + '\',\'' + arr[r].replace(/'/g, "") + '\',event)">x</b></span>';
+        }
+        h += '</div>';
+      }
+
+      if (!full) {
+        h += '<button class="btn-main" style="width:100%;margin-top:8px;padding:7px;font-size:12.5px;background:#7c3aed" onclick="openRaJoin(\'' + ev.id + '\',event)">' + T.raJoinBtn + '</button>';
+      } else {
+        h += '<div style="margin-top:6px;font-size:12px;color:#0d9488;font-weight:bold;text-align:center">' + T.raFullBadge + '</div>';
+      }
+      h += '</div>';
+    }
+  }
+  h += '</div>';
+  return h;
 }
 
 function draw() {
@@ -885,6 +1059,7 @@ function draw() {
             var tt = b.ilanApproved ? T.ilanOk : T.needIlan;
             h += '<span class="tag ' + tc + '">' + tt + '</span>';
           }
+          h += renderBookingRaBadges(b);
           h += '</div>';
         }
         h += '<div class="add-hint">' + T.add + '</div></td>';
@@ -926,6 +1101,7 @@ function draw() {
           h += '<button class="del-btn" onclick="delItem(\'';
           h += b2.id + '\',event)">' + T.del + '</button></div></div>';
           if (b2.experiment) h += '<div>' + b2.experiment + '</div>';
+          h += renderBookingRaBadges(b2);
           h += '</div>';
         }
       }
@@ -935,6 +1111,8 @@ function draw() {
       }
       h += '</div>';
     }
+  } else if (S.tab === "ra") {
+    h += drawRaSideHtml(days);
   } else {
     h += '<div class="card" style="background:#fffbeb;border-color:#f59e0b">';
     h += '<div style="display:flex;align-items:center;gap:12px">';
@@ -958,6 +1136,7 @@ function draw() {
           h += '<div onclick="openEdit(\'' + b3.id + '\',event)"><b>' + b3.startTime + '-' + b3.endTime + '</b> ';
           h += ' | ' + b3.studentName + ' (' + getEqName(b3.equipmentId) + ')';
           if (b3.experiment) h += '<div>' + b3.experiment + '</div>';
+          h += renderBookingRaBadges(b3);
           h += '</div><div style="display:flex;gap:6px;align-items:center">';
           h += '<button class="cal-mini" onclick="openEdit(\'';
           h += b3.id + '\',event)">\u270e</button>';
@@ -978,7 +1157,9 @@ function draw() {
     }
   }
 
-  h += '</div></div></div>';
+  h += '</div>';
+  h += '<aside class="ra-side">' + drawRaSideHtml(days) + '</aside>';
+  h += '</div></div>';
 
   if (S.modal) {
     h += '<div class="modal-bg"><div class="modal">';
@@ -1032,6 +1213,15 @@ function draw() {
     h += '<div class="field"><label>' + T.exLbl + '</label>';
     h += '<input id="f_ex" type="text" value="' + S.f.exp + '"></div>';
 
+    h += '<div class="field"><label style="color:#4c1d95">' + T.raLbl + '</label>';
+    h += '<select id="f_ra" style="background:#f5f3ff;border-color:#c4b5fd;font-weight:bold">';
+    h += '<option value="0"' + (Number(S.f.raNeeded) === 0 ? ' selected' : '') + '>' + T.raNone + '</option>';
+    for (var rc = 1; rc <= 5; rc++) {
+      var selRa = Number(S.f.raNeeded) === rc ? " selected" : "";
+      h += '<option value="' + rc + '"' + selRa + '>' + rc + ' \u05e2\u05d5\u05d6\u05e8\u05d9 \u05de\u05d7\u05e7\u05e8</option>';
+    }
+    h += '</select></div>';
+
     var chk = S.f.ilan ? " checked" : "";
     h += '<div class="field"><label style="background:#fffbeb;padding:10px;border-radius:8px;border:1px solid #f59e0b;cursor:pointer">';
     h += '<input id="f_il" type="checkbox"' + chk + '> ' + T.chkIlan + '</label></div>';
@@ -1039,6 +1229,28 @@ function draw() {
     h += '<button type="submit" class="btn-main" ';
     h += 'style="width:100%">' + (S.editId ? T.saveChanges : T.save) + '</button>';
     h += '</form></div></div>';
+  }
+
+  if (S.raModalId) {
+    var targetB = null;
+    for (var z = 0; z < S.list.length; z++) {
+      if (S.list[z].id === S.raModalId) targetB = S.list[z];
+    }
+    if (targetB) {
+      h += '<div class="modal-bg"><div class="modal">';
+      h += '<div class="row-top" style="margin-bottom:12px">';
+      h += '<b style="font-size:16px;color:#4c1d95">' + T.raModalTitle + '</b>';
+      h += '<button class="del-btn" onclick="closeRaJoin()">X</button></div>';
+      h += '<div style="font-size:13.5px;margin-bottom:12px;background:#f5f3ff;padding:10px;border-radius:8px;border:1px solid #ddd6fe">';
+      h += '<b>' + getEqName(targetB.equipmentId) + '</b> | ' + targetB.studentName + '<br>';
+      h += targetB.date + ' (' + targetB.startTime + '-' + targetB.endTime + ')';
+      if (targetB.experiment) h += '<br>' + targetB.experiment;
+      h += '</div>';
+      h += '<form onsubmit="submitRaJoin(event)">';
+      h += '<div class="field"><input id="ra_name_inp" type="text" placeholder="' + T.raNamePh + '" value="' + S.raDraftName + '" required></div>';
+      h += '<button type="submit" class="btn-main" style="width:100%;background:#7c3aed">' + T.raJoinBtn + '</button>';
+      h += '</form></div></div>';
+    }
   }
 
   if (S.calItem) {
@@ -1074,6 +1286,8 @@ function draw() {
   h += 'onclick="goTab(\'daily\')">' + T.t2 + '</button>';
   h += '<button class="' + (S.tab === "ilan" ? "active" : "") + '" ';
   h += 'onclick="goTab(\'ilan\')">' + T.t3 + '</button>';
+  h += '<button class="' + (S.tab === "ra" ? "active" : "") + '" ';
+  h += 'onclick="goTab(\'ra\')">' + T.t4 + '</button>';
   h += '</nav>';
 
   document.getElementById("app").innerHTML = h;
