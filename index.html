@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lab Schedule</title>
+<title>Lab Schedule v14</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.3.5/mqtt.min.js"></script>
 <style>
   * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
   body { margin: 0; background: #f1f5f9; color: #0f172a; padding-bottom: 85px; }
@@ -118,7 +119,7 @@ var ILAN_SVG = '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">' 
   '</svg>';
 
 var T = {
-  title: "\u05d6\u05de\u05d9\u05e0\u05d5\u05ea \u05de\u05db\u05e9\u05d9\u05e8\u05d9\u05dd \u2013 \u05de\u05e2\u05d1\u05d3\u05d4",
+  title: "\u05d6\u05de\u05d9\u05e0\u05d5\u05ea \u05de\u05db\u05e9\u05d9\u05e8\u05d9\u05dd \u2013 \u05de\u05e2\u05d1\u05d3\u05d4 (v14)",
   casting: "\u05e2\u05de\u05d3\u05ea \u05d9\u05e6\u05d9\u05e7\u05d4",
   polishing: "\u05de\u05db\u05d5\u05e0\u05ea \u05dc\u05d9\u05d8\u05d5\u05e9",
   other: "\u05d0\u05d7\u05e8",
@@ -191,8 +192,8 @@ var T = {
   addNotePh: "\u05db\u05ea\u05d5\u05d1 \u05d4\u05d5\u05d3\u05e2\u05d4 \u05d7\u05d3\u05e9\u05d4 \u05dc\u05dc\u05d5\u05d7...",
   addNoteBtn: "\u05e4\u05e8\u05e1\u05dd \u05d1\u05dc\u05d5\u05d7",
   defNote1: "\u05e0\u05d0 \u05dc\u05ea\u05d0\u05dd \u05d9\u05e6\u05d9\u05e7\u05d5\u05ea \u05d5\u05d1\u05d3\u05d9\u05e7\u05d5\u05ea \u05de\u05e8\u05d0\u05e9 \u05d5\u05dc\u05e0\u05e7\u05d5\u05ea \u05d0\u05ea \u05e2\u05de\u05d3\u05ea \u05d4\u05d9\u05e6\u05d9\u05e7\u05d4 \u05d1\u05e1\u05d9\u05d5\u05dd.",
-  syncOk: "\u05e1\u05e0\u05db\u05e8\u05d5\u05df \u05d0\u05d5\u05d8\u05d5\u05de\u05d8\u05d9 \u05e4\u05e2\u05d9\u05dc \u05d1\u05d6\u05de\u05df \u05d0\u05de\u05ea",
-  syncWait: "\u05de\u05ea\u05d7\u05d1\u05e8 \u05dc\u05e1\u05e0\u05db\u05e8\u05d5\u05df \u05d7\u05d9..."
+  syncOk: "\u05de\u05d7\u05d5\u05d1\u05e8 \u05dc\u05e1\u05e0\u05db\u05e8\u05d5\u05df \u05d7\u05d9 \u05d1\u05d6\u05de\u05df \u05d0\u05de\u05ea",
+  syncWait: "\u05de\u05ea\u05d7\u05d1\u05e8 \u05dc\u05e9\u05e8\u05ea \u05e1\u05e0\u05db\u05e8\u05d5\u05df..."
 };
 
 var EQ = [
@@ -291,12 +292,19 @@ function getTodayWorkingIso() {
   return fmtIso(d);
 }
 
+var SAVED_DEL_IDS = {};
+try {
+  SAVED_DEL_IDS = JSON.parse(localStorage.getItem("lab_del_v10") || "{}");
+} catch (e) {}
+
 function loadMergedBookings() {
   var map = {};
   for (var i = 0; i < INIT.length; i++) {
-    map[INIT[i].id] = INIT[i];
+    if (!SAVED_DEL_IDS[INIT[i].id]) {
+      map[INIT[i].id] = INIT[i];
+    }
   }
-  var keys = ["lab_v5", "lab_v6", "lab_v7", "lab_v8", "lab_v9", "lab_v10", "lab_v11", "lab_v12", "lab_v13"];
+  var keys = ["lab_v5", "lab_v6", "lab_v7", "lab_v8", "lab_v9", "lab_v10", "lab_v11", "lab_v12", "lab_v13", "lab_v14"];
   for (var k = 0; k < keys.length; k++) {
     try {
       var raw = localStorage.getItem(keys[k]);
@@ -305,8 +313,10 @@ function loadMergedBookings() {
         if (Array.isArray(arr)) {
           for (var j = 0; j < arr.length; j++) {
             var it = arr[j];
+            var idStr = String(it.id || ("m" + j));
+            if (SAVED_DEL_IDS[idStr] || it.deleted) continue;
             var norm = {
-              id: String(it.id || ("m" + j)),
+              id: idStr,
               equipmentId: it.equipmentId || it.eq || "controls",
               date: it.date || it.dt || "2026-10-25",
               startTime: it.startTime || it.st || "09:00",
@@ -317,10 +327,12 @@ function loadMergedBookings() {
               ilanApproved: !!(it.ilanApproved || it.ok),
               raNeeded: Number(it.raNeeded || 0),
               raList: Array.isArray(it.raList) ? it.raList : [],
-              updatedAt: it.updatedAt || Date.now(),
-              deleted: !!it.deleted
+              updatedAt: it.updatedAt || 1000
             };
-            map[norm.id] = norm;
+            var prev = map[norm.id];
+            if (!prev || (norm.updatedAt >= (prev.updatedAt || 0))) {
+              map[norm.id] = norm;
+            }
           }
         }
       }
@@ -328,7 +340,7 @@ function loadMergedBookings() {
   }
   var out = [];
   for (var id in map) {
-    if (map.hasOwnProperty(id) && !map[id].deleted) out.push(map[id]);
+    if (map.hasOwnProperty(id) && !SAVED_DEL_IDS[id]) out.push(map[id]);
   }
   return out;
 }
@@ -336,7 +348,9 @@ function loadMergedBookings() {
 function loadNotes() {
   try {
     var n = JSON.parse(localStorage.getItem("lab_notes_v1"));
-    if (Array.isArray(n)) return n;
+    if (Array.isArray(n)) {
+      return n.filter(function(item) { return item && !SAVED_DEL_IDS[item.id]; });
+    }
   } catch (e) {}
   return [{ id: "n1", text: T.defNote1 }];
 }
@@ -348,7 +362,7 @@ var S = {
   tab: "table",
   dayIso: getTodayWorkingIso(),
   list: loadMergedBookings(),
-  deletedIds: JSON.parse(localStorage.getItem("lab_del_v10") || "{}"),
+  deletedIds: SAVED_DEL_IDS,
   notes: loadNotes(),
   draftNote: "",
   customAvatar: localStorage.getItem("ilan_avatar_img") || "",
@@ -411,17 +425,12 @@ window.uploadAvatarFile = function(ev) {
 
 function saveLocalOnly() {
   try {
+    localStorage.setItem("lab_v14", JSON.stringify(S.list));
     localStorage.setItem("lab_v13", JSON.stringify(S.list));
-    localStorage.setItem("lab_v12", JSON.stringify(S.list));
     localStorage.setItem("lab_del_v10", JSON.stringify(S.deletedIds));
     localStorage.setItem("lab_notes_v1", JSON.stringify(S.notes));
   } catch (e) {}
 }
-
-// מסד נתונים אמיתי בענן (Firebase Realtime DB + גיבוי אוטומטי) לסנכרון חי ללא שום לחיצת כפתור
-var FB_DB_URL = "https://bgu-lab-schedule-default-rtdb.firebaseio.com/lab_shared_v13.json";
-var BACKUP_SYNC_URL = "https://jsonblob.com/api/jsonBlob/1304482519464820736";
-var activeCloudEndpoint = localStorage.getItem("bgu_active_cloud_ep") || "";
 
 function buildPayload() {
   return {
@@ -435,6 +444,7 @@ function buildPayload() {
 function mergeRemoteState(remote) {
   if (!remote || !Array.isArray(remote.list)) return { changed: false, localHasMore: false };
   var changed = false;
+  var localHasUnpushed = false;
 
   if (remote.deletedIds) {
     for (var dId in remote.deletedIds) {
@@ -442,6 +452,11 @@ function mergeRemoteState(remote) {
         S.deletedIds[dId] = true;
         changed = true;
       }
+    }
+  }
+  for (var myDel in S.deletedIds) {
+    if (S.deletedIds.hasOwnProperty(myDel) && (!remote.deletedIds || !remote.deletedIds[myDel])) {
+      localHasUnpushed = true;
     }
   }
 
@@ -452,7 +467,6 @@ function mergeRemoteState(remote) {
     }
   }
 
-  var localHasUnpushed = false;
   var map = {};
   for (var i = 0; i < S.list.length; i++) {
     var lb = S.list[i];
@@ -472,12 +486,12 @@ function mergeRemoteState(remote) {
       rb.raNeeded = Number(rb.raNeeded || 0);
       rb.raList = Array.isArray(rb.raList) ? rb.raList : [];
       var existing = map[rb.id];
-      if (!existing || (rb.updatedAt || 0) >= (existing.updatedAt || 0)) {
+      if (!existing || (rb.updatedAt || 0) > (existing.updatedAt || 0)) {
         if (JSON.stringify(existing) !== JSON.stringify(rb)) {
           map[rb.id] = rb;
           changed = true;
         }
-      } else {
+      } else if (existing && (existing.updatedAt || 0) > (rb.updatedAt || 0)) {
         localHasUnpushed = true;
       }
     }
@@ -489,13 +503,31 @@ function mergeRemoteState(remote) {
   }
   S.list = merged;
 
-  if (Array.isArray(remote.notes) && JSON.stringify(remote.notes) !== JSON.stringify(S.notes)) {
-    if ((remote.ts || 0) >= (S.lastNoteTs || 0)) {
-      S.notes = remote.notes;
-      changed = true;
-    } else {
-      localHasUnpushed = true;
+  // מיזוג הודעות לוח מודעות לפי מזהה (ללא תלות בשעון המכשיר)
+  if (Array.isArray(remote.notes)) {
+    var noteMap = {};
+    var noteOrder = [];
+    for (var ni = 0; ni < S.notes.length; ni++) {
+      var ln = S.notes[ni];
+      if (ln && ln.id && !S.deletedIds[ln.id]) {
+        noteMap[ln.id] = ln;
+        noteOrder.push(ln.id);
+      }
     }
+    for (var nj = 0; nj < remote.notes.length; nj++) {
+      var rn = remote.notes[nj];
+      if (rn && rn.id && !S.deletedIds[rn.id] && !noteMap[rn.id]) {
+        noteMap[rn.id] = rn;
+        noteOrder.unshift(rn.id);
+        changed = true;
+      }
+    }
+    var mergedNotes = [];
+    for (var nk = 0; nk < noteOrder.length; nk++) {
+      if (noteMap[noteOrder[nk]]) mergedNotes.push(noteMap[noteOrder[nk]]);
+    }
+    if (mergedNotes.length !== S.notes.length) changed = true;
+    S.notes = mergedNotes;
   }
 
   if (changed) {
@@ -505,51 +537,77 @@ function mergeRemoteState(remote) {
   return { changed: changed, localHasMore: localHasUnpushed };
 }
 
-// סנכרון חכם שקורא וממזג אוטומטית לפני כל כתיבה כדי שאף מכשיר לא ידרוס מכשיר אחר
-function syncWithCloud(forceWrite) {
-  if (!forceWrite && (isUserTyping() || S.modal || S.calItem || S.raModalId)) return;
+// מנוע סנכרון משולש בזמן אמת (MQTT WebSockets עם Retain=true)
+var MQTT_TOPIC = "bgu_ilan_lab_2026_v14/state";
+var mqttClients = [];
 
-  // מנסה קודם דרך ערוץ JSON מהיר ופתוח לכל הדפדפנים (ללא חסימות Brave)
-  fetch("https://ntfy.sh/bgu_ilan_lab_sync_2026_v13/json?poll=1&since=all")
-    .then(function(res) { return res.text(); })
-    .then(function(text) {
-      var lines = text.trim().split("\n");
-      var needPushBack = false;
-      var gotAny = false;
-      for (var i = 0; i < lines.length; i++) {
-        if (!lines[i]) continue;
-        try {
-          var msg = JSON.parse(lines[i]);
-          if (msg && msg.message) {
-            var data = JSON.parse(msg.message);
-            gotAny = true;
-            var resMerge = mergeRemoteState(data);
-            if (i === lines.length - 1 && resMerge.localHasMore) {
-              needPushBack = true;
-            }
+function publishToAllBrokers() {
+  var msgStr = JSON.stringify(buildPayload());
+  for (var i = 0; i < mqttClients.length; i++) {
+    try {
+      if (mqttClients[i] && mqttClients[i].connected) {
+        mqttClients[i].publish(MQTT_TOPIC, msgStr, { qos: 1, retain: true });
+      }
+    } catch (e) {}
+  }
+}
+
+function initRealtimeSync() {
+  if (typeof mqtt === "undefined") return;
+  var brokers = [
+    "wss://broker.emqx.io:8084/mqtt",
+    "wss://broker.hivemq.com:8884/mqtt",
+    "wss://test.mosquitto.org:8081"
+  ];
+
+  for (var i = 0; i < brokers.length; i++) {
+    (function(url) {
+      try {
+        var client = mqtt.connect(url, {
+          clientId: "bgu_lab_" + Math.random().toString(16).slice(2, 10),
+          clean: true,
+          connectTimeout: 5000,
+          reconnectPeriod: 3000
+        });
+
+        var gotInitialRetained = false;
+
+        client.on("connect", function() {
+          if (!S.synced) {
+            S.synced = true;
+            if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
           }
-        } catch (e) {}
-      }
+          client.subscribe(MQTT_TOPIC, { qos: 1 }, function() {
+            setTimeout(function() {
+              if (!gotInitialRetained) {
+                client.publish(MQTT_TOPIC, JSON.stringify(buildPayload()), { qos: 1, retain: true });
+              }
+            }, 1500);
+          });
+        });
 
-      if (forceWrite || !gotAny || needPushBack) {
-        fetch("https://ntfy.sh/bgu_ilan_lab_sync_2026_v13", {
-          method: "POST",
-          body: JSON.stringify(buildPayload())
-        }).catch(function() {});
-      }
+        client.on("message", function(topic, payloadBuf) {
+          if (topic !== MQTT_TOPIC) return;
+          gotInitialRetained = true;
+          try {
+            var data = JSON.parse(payloadBuf.toString());
+            var res = mergeRemoteState(data);
+            if (res.localHasMore) {
+              client.publish(MQTT_TOPIC, JSON.stringify(buildPayload()), { qos: 1, retain: true });
+            }
+          } catch (e) {}
+        });
 
-      if (!S.synced) {
-        S.synced = true;
-        if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
-      }
-    }).catch(function() {});
+        mqttClients.push(client);
+      } catch (err) {}
+    })(brokers[i]);
+  }
 }
 
 function saveAndPush() {
-  S.lastNoteTs = Date.now();
   saveLocalOnly();
   draw();
-  syncWithCloud(true);
+  publishToAllBrokers();
 }
 
 window.onNoteInput = function(val) {
@@ -565,7 +623,7 @@ window.addNote = function(ev) {
   }
   if (!text) return;
   S.notes.unshift({
-    id: "n" + Date.now(),
+    id: "n" + Date.now() + "_" + Math.floor(Math.random() * 100),
     text: text
   });
   S.draftNote = "";
@@ -573,6 +631,7 @@ window.addNote = function(ev) {
 };
 
 window.delNote = function(id) {
+  S.deletedIds[id] = true;
   S.notes = S.notes.filter(function(n) {
     return n.id !== id;
   });
@@ -649,7 +708,6 @@ function makeGCalUrl(b) {
     "&location=" + encodeURIComponent(T.labLoc);
 }
 
-// קישור ישיר בלחיצה אחת ל-Outlook (ללא הורדת קובץ ICS)
 function makeOutlook365Url(b) {
   var eqName = getEqName(b.equipmentId);
   var title = eqName + " - " + b.studentName;
@@ -1323,8 +1381,7 @@ function draw() {
 }
 
 draw();
-syncWithCloud(false);
-setInterval(function() { syncWithCloud(false); }, 3500);
+initRealtimeSync();
 </script>
 </body>
 </html>
