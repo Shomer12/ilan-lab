@@ -7,7 +7,7 @@
 <style>
   * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
   body { margin: 0; background: #f1f5f9; color: #0f172a; padding-bottom: 85px; }
-  .hdr { background: #0f172a; color: #fff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+  .hdr { background: #0f172a; color: #fff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 10px; }
   .hdr-title { display: flex; align-items: center; gap: 14px; }
   .hdr h1 { margin: 0; font-size: 21px; }
   .sync-badge { font-size: 12px; color: #cbd5e1; display: flex; align-items: center; gap: 6px; margin-top: 2px; cursor: pointer; }
@@ -18,10 +18,13 @@
   .ilan-avatar img, .ilan-avatar svg { width: 100%; height: 100%; object-fit: cover; display: block; }
   .btn-main { background: #2563eb; color: #fff; border: 0; padding: 10px 18px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
   .btn-main:hover { background: #1d4ed8; }
+  .btn-sync-now { background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 8px 12px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
+  .btn-sync-now:hover { background: #475569; }
   .btn-cal { background: #0078d4; color: #fff; border: 0; padding: 10px 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 13px; width: 100%; margin-top: 8px; }
-  .bar { background: #fff; border-bottom: 1px solid #cbd5e1; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
-  .btn-sec { background: #e2e8f0; border: 0; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; color: #1e293b; }
+  .bar { background: #fff; border-bottom: 1px solid #cbd5e1; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .btn-sec { background: #e2e8f0; border: 0; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; color: #1e293b; }
   .btn-sec:hover { background: #cbd5e1; }
+  .btn-today { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
   .wrap { padding: 18px; max-width: 1820px; margin: 0 auto; }
   .main-layout { display: flex; flex-direction: column; gap: 18px; }
   @media (min-width: 1150px) {
@@ -40,6 +43,7 @@
   table { width: 100%; border-collapse: collapse; min-width: 860px; font-size: 14.5px; }
   th, td { border-left: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; padding: 10px; vertical-align: top; }
   th { background: #f8fafc; text-align: center; font-size: 15.5px; padding: 12px 8px; }
+  .th-today { background: #eff6ff; border-bottom: 3px solid #2563eb; }
   .eq-col { background: #f8fafc; font-weight: bold; width: 135px; text-align: right; font-size: 15px; }
   .cell { cursor: pointer; min-height: 125px; width: 18%; transition: background 0.15s; }
   .cell:hover { background: #f1f5f9; }
@@ -137,6 +141,7 @@ var T = {
   newBtn: "+ \u05e9\u05d9\u05d1\u05d5\u05e5 \u05d7\u05d3\u05e9",
   prevW: "\u05e9\u05d1\u05d5\u05e2 \u05e7\u05d5\u05d3\u05dd",
   nextW: "\u05e9\u05d1\u05d5\u05e2 \u05d4\u05d1\u05d0",
+  currWBtn: "\u05d4\u05e9\u05d1\u05d5\u05e2 \u05d4\u05e0\u05d5\u05db\u05d7\u05d9",
   workW: "\u05e9\u05d1\u05d5\u05e2 \u05e2\u05d1\u05d5\u05d3\u05d4",
   dev: "\u05de\u05db\u05e9\u05d9\u05e8",
   day: "\u05d9\u05d5\u05dd",
@@ -189,8 +194,9 @@ var T = {
   addNotePh: "\u05db\u05ea\u05d5\u05d1 \u05d4\u05d5\u05d3\u05e2\u05d4 \u05d7\u05d3\u05e9\u05d4 \u05dc\u05dc\u05d5\u05d7...",
   addNoteBtn: "\u05e4\u05e8\u05e1\u05dd \u05d1\u05dc\u05d5\u05d7",
   defNote1: "\u05e0\u05d0 \u05dc\u05ea\u05d0\u05dd \u05d9\u05e6\u05d9\u05e7\u05d5\u05ea \u05d5\u05d1\u05d3\u05d9\u05e7\u05d5\u05ea \u05de\u05e8\u05d0\u05e9 \u05d5\u05dc\u05e0\u05e7\u05d5\u05ea \u05d0\u05ea \u05e2\u05de\u05d3\u05ea \u05d4\u05d9\u05e6\u05d9\u05e7\u05d4 \u05d1\u05e1\u05d9\u05d5\u05dd.",
-  syncOk: "\u05de\u05e1\u05d5\u05e0\u05db\u05e8\u05df \u05dc\u05e2\u05e0\u05df \u05d1\u05d9\u05df \u05d4\u05de\u05db\u05e9\u05d9\u05e8\u05d9\u05dd",
-  syncWait: "\u05de\u05ea\u05d7\u05d1\u05e8 \u05dc\u05e2\u05e0\u05df..."
+  syncOk: "\u05de\u05e1\u05d5\u05e0\u05db\u05e8\u05df \u05dc\u05e2\u05e0\u05df (\u05db\u05dc \u05d4\u05de\u05db\u05e9\u05d9\u05e8\u05d9\u05dd)",
+  syncWait: "\u05de\u05e1\u05e0\u05db\u05e8\u05df \u05e2\u05e0\u05df...",
+  forcePushBtn: "\ud83d\udd04 \u05e1\u05e0\u05db\u05e8\u05df \u05de\u05db\u05e9\u05d9\u05e8 \u05d6\u05d4 \u05dc\u05db\u05d5\u05dc\u05dd"
 };
 
 var EQ = [
@@ -261,12 +267,42 @@ var INIT = [
   }
 ];
 
+function fmtIso(d) {
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, "0");
+  var day = String(d.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + day;
+}
+
+// מחשב את תחילת השבוע הנוכחי (יום א') באופן אוטומטי לפי התאריך של היום
+function getCurrentWeekSundayIso() {
+  var now = new Date();
+  var day = now.getDay(); // 0 = Sunday, 6 = Saturday
+  var d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+  if (day === 6) {
+    // אם היום יום שבת - מציג כבר את השבוע הקרוב שמתחיל מחר
+    d.setDate(d.getDate() + 1);
+  } else {
+    d.setDate(d.getDate() - day);
+  }
+  return fmtIso(d);
+}
+
+function getTodayWorkingIso() {
+  var now = new Date();
+  var day = now.getDay();
+  var d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+  if (day === 5) d.setDate(d.getDate() - 1);
+  if (day === 6) d.setDate(d.getDate() + 1);
+  return fmtIso(d);
+}
+
 function loadMergedBookings() {
   var map = {};
   for (var i = 0; i < INIT.length; i++) {
     map[INIT[i].id] = INIT[i];
   }
-  var keys = ["lab_v5", "lab_v6", "lab_v7", "lab_v8", "lab_v9", "lab_v10", "lab_v11"];
+  var keys = ["lab_v5", "lab_v6", "lab_v7", "lab_v8", "lab_v9", "lab_v10", "lab_v11", "lab_v12"];
   for (var k = 0; k < keys.length; k++) {
     try {
       var raw = localStorage.getItem(keys[k]);
@@ -287,7 +323,7 @@ function loadMergedBookings() {
               ilanApproved: !!(it.ilanApproved || it.ok),
               raNeeded: Number(it.raNeeded || 0),
               raList: Array.isArray(it.raList) ? it.raList : [],
-              updatedAt: it.updatedAt || 0,
+              updatedAt: it.updatedAt || Date.now(),
               deleted: !!it.deleted
             };
             map[norm.id] = norm;
@@ -311,10 +347,12 @@ function loadNotes() {
   return [{ id: "n1", text: T.defNote1 }];
 }
 
+var TODAY_ISO = fmtIso(new Date());
+
 var S = {
-  weekStart: "2026-10-25",
+  weekStart: getCurrentWeekSundayIso(),
   tab: "table",
-  dayIso: "2026-10-25",
+  dayIso: getTodayWorkingIso(),
   list: loadMergedBookings(),
   deletedIds: JSON.parse(localStorage.getItem("lab_del_v10") || "{}"),
   notes: loadNotes(),
@@ -329,7 +367,7 @@ var S = {
   err: "",
   f: {
     eq: "controls",
-    date: "2026-10-25",
+    date: getTodayWorkingIso(),
     st: "10:00",
     et: "12:00",
     name: "",
@@ -379,12 +417,15 @@ window.uploadAvatarFile = function(ev) {
 
 function saveLocalOnly() {
   try {
+    localStorage.setItem("lab_v12", JSON.stringify(S.list));
     localStorage.setItem("lab_v11", JSON.stringify(S.list));
-    localStorage.setItem("lab_v10", JSON.stringify(S.list));
     localStorage.setItem("lab_del_v10", JSON.stringify(S.deletedIds));
     localStorage.setItem("lab_notes_v1", JSON.stringify(S.notes));
   } catch (e) {}
 }
+
+// סנכרון כפול: גם ערוץ ntfy חי וגם שמירה אוטומטית של אירועים מקומיים שלא קיימים בענן
+var NTFY_TOPIC = "https://ntfy.sh/bgu_ilan_lab_sync_2026_v10";
 
 function pushCloud() {
   var payload = {
@@ -393,7 +434,7 @@ function pushCloud() {
     deletedIds: S.deletedIds,
     notes: S.notes
   };
-  fetch("https://ntfy.sh/bgu_ilan_lab_sync_2026_v10", {
+  fetch(NTFY_TOPIC, {
     method: "POST",
     body: JSON.stringify(payload)
   }).then(function(res) {
@@ -404,8 +445,14 @@ function pushCloud() {
   }).catch(function() {});
 }
 
+window.forcePushAll = function() {
+  S.synced = false;
+  draw();
+  pushCloud();
+};
+
 function mergeRemoteState(remote) {
-  if (!remote || !Array.isArray(remote.list)) return;
+  if (!remote || !Array.isArray(remote.list)) return { changed: false, localHasMore: false };
   var changed = false;
 
   if (remote.deletedIds) {
@@ -417,10 +464,22 @@ function mergeRemoteState(remote) {
     }
   }
 
+  var remoteMap = {};
+  for (var r = 0; r < remote.list.length; r++) {
+    if (remote.list[r] && remote.list[r].id) {
+      remoteMap[remote.list[r].id] = remote.list[r];
+    }
+  }
+
+  var localHasUnpushed = false;
   var map = {};
   for (var i = 0; i < S.list.length; i++) {
-    if (!S.deletedIds[S.list[i].id]) {
-      map[S.list[i].id] = S.list[i];
+    var lb = S.list[i];
+    if (!S.deletedIds[lb.id]) {
+      map[lb.id] = lb;
+      if (!remoteMap[lb.id]) {
+        localHasUnpushed = true;
+      }
     } else {
       changed = true;
     }
@@ -447,7 +506,7 @@ function mergeRemoteState(remote) {
   }
   S.list = merged;
 
-  if (Array.isArray(remote.notes) && JSON.stringify(remote.notes) !== JSON.stringify(S.notes)) {
+  if (Array.isArray(remote.notes) && remote.notes.length > S.notes.length) {
     S.notes = remote.notes;
     changed = true;
   }
@@ -456,23 +515,35 @@ function mergeRemoteState(remote) {
     saveLocalOnly();
     if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
   }
+  return { changed: changed, localHasMore: localHasUnpushed };
 }
+
+var initialPushDone = false;
 
 function pullCloudHistory() {
   if (isUserTyping() || S.modal || S.calItem || S.raModalId) return;
-  fetch("https://ntfy.sh/bgu_ilan_lab_sync_2026_v10/json?poll=1&since=48h")
+  fetch(NTFY_TOPIC + "/json?poll=1&since=all")
     .then(function(res) { return res.text(); })
     .then(function(text) {
       var lines = text.trim().split("\n");
+      var lastRemote = null;
       for (var i = 0; i < lines.length; i++) {
         if (!lines[i]) continue;
         try {
           var msg = JSON.parse(lines[i]);
           if (msg && msg.message) {
             var data = JSON.parse(msg.message);
+            lastRemote = data;
             mergeRemoteState(data);
           }
         } catch (e) {}
+      }
+      // אם במחשב הזה יש משימות מקומיות שנמחקו מהענן אחרי 48 שעות, דוחף אותן אוטומטית חזרה לענן של כולם!
+      if (!initialPushDone) {
+        initialPushDone = true;
+        if (!lastRemote || S.list.length > (lastRemote.list ? lastRemote.list.length : 0)) {
+          pushCloud();
+        }
       }
       if (!S.synced) {
         S.synced = true;
@@ -676,13 +747,6 @@ function parseD(str) {
   );
 }
 
-function fmtIso(d) {
-  var y = d.getFullYear();
-  var m = String(d.getMonth() + 1).padStart(2, "0");
-  var day = String(d.getDate()).padStart(2, "0");
-  return y + "-" + m + "-" + day;
-}
-
 function getDays(baseStr) {
   var b = parseD(baseStr);
   b.setDate(b.getDate() - b.getDay());
@@ -721,6 +785,12 @@ window.moveWeek = function(delta) {
   d.setDate(d.getDate() - d.getDay() + delta);
   S.weekStart = fmtIso(d);
   S.dayIso = S.weekStart;
+  draw();
+};
+
+window.goCurrentWeek = function() {
+  S.weekStart = getCurrentWeekSundayIso();
+  S.dayIso = getTodayWorkingIso();
   draw();
 };
 
@@ -999,17 +1069,22 @@ function draw() {
   h += '<div class="sync-badge" onclick="pullCloudHistory()">';
   h += '<span class="dot ' + (S.synced ? 'dot-ok' : 'dot-wait') + '"></span>';
   h += '<span>' + (S.synced ? T.syncOk : T.syncWait) + '</span></div></div></div>';
-  h += '<button class="btn-main" onclick="openAdd()">';
-  h += T.newBtn + '</button></div>';
+  h += '<div style="display:flex;gap:8px;align-items:center">';
+  h += '<button class="btn-sync-now" onclick="forcePushAll()" title="דחוף את כל המשימות מהמחשב הזה לכל שאר המכשירים">' + T.forcePushBtn + '</button>';
+  h += '<button class="btn-main" onclick="openAdd()">' + T.newBtn + '</button>';
+  h += '</div></div>';
 
   h += '<div class="bar">';
-  h += '<button class="btn-sec" onclick="moveWeek(-7)">';
-  h += T.prevW + '</button>';
+  h += '<button class="btn-sec" onclick="moveWeek(-7)">' + T.prevW + '</button>';
+  h += '<div style="display:flex;align-items:center;gap:12px">';
   h += '<div style="text-align:center">';
   h += '<div style="font-size:12px;color:#64748b">' + T.workW + '</div>';
   h += '<b style="font-size:16px">' + days[0].disp + ' - ' + days[4].disp + '</b></div>';
-  h += '<button class="btn-sec" onclick="moveWeek(7)">';
-  h += T.nextW + '</button></div>';
+  if (S.weekStart !== getCurrentWeekSundayIso()) {
+    h += '<button class="btn-today" onclick="goCurrentWeek()">' + T.currWBtn + '</button>';
+  }
+  h += '</div>';
+  h += '<button class="btn-sec" onclick="moveWeek(7)">' + T.nextW + '</button></div>';
 
   h += '<div class="wrap"><div class="main-layout">';
   h += '<aside class="board-side">' + drawBoardHtml() + '</aside>';
@@ -1019,7 +1094,8 @@ function draw() {
     h += '<div class="tbl-box"><table><thead><tr>';
     h += '<th class="eq-col">' + T.dev + '</th>';
     for (var d = 0; d < days.length; d++) {
-      h += '<th><div>' + T.day + ' ' + days[d].name + '</div>';
+      var isToday = days[d].iso === TODAY_ISO;
+      h += '<th class="' + (isToday ? 'th-today' : '') + '"><div>' + T.day + ' ' + days[d].name + '</div>';
       h += '<div style="font-size:13px;color:#64748b;font-weight:normal">';
       h += days[d].disp + '</div></th>';
     }
