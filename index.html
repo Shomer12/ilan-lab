@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Lab Schedule v16</title>
+<title>Lab Schedule v17</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.3.5/mqtt.min.js"></script>
 <style>
   * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
@@ -52,6 +52,8 @@
   .cell:hover { background: #f1f5f9; }
   .item { padding: 8px 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #cbd5e1; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s; }
   .item:hover { transform: translateY(-1px); }
+  .item-done { opacity: 0.82; cursor: default; }
+  .item-done:hover { transform: none; }
   .c-controls { background: #dbeafe; border-color: #60a5fa; color: #1e3a8a; }
   .c-mts { background: #d1fae5; border-color: #34d399; color: #064e3b; }
   .c-actuators { background: #f3e8ff; border-color: #c084fc; color: #581c87; }
@@ -62,6 +64,7 @@
   .act-btns { display: flex; gap: 3px; align-items: center; }
   .del-btn { background: rgba(255,255,255,0.8); border: 1px solid #fca5a5; border-radius: 5px; color: #dc2626; font-weight: bold; cursor: pointer; padding: 1px 5px; font-size: 11px; }
   .cal-mini { background: rgba(255,255,255,0.85); border: 1px solid #94a3b8; border-radius: 5px; font-size: 11px; padding: 1px 5px; cursor: pointer; font-weight: bold; color: #0f172a; text-decoration: none; }
+  .done-badge { background: rgba(255,255,255,0.85); border: 1px solid #94a3b8; border-radius: 5px; font-size: 10.5px; padding: 1px 5px; color: #475569; font-weight: bold; }
   .tag { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; margin-left: 4px; padding: 2px 7px; border-radius: 6px; font-size: 11.5px; font-weight: bold; color: #fff; }
   .tag-wait { background: #f59e0b; }
   .tag-ok { background: #059669; }
@@ -124,7 +127,7 @@ var ILAN_SVG = '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">' 
   '</svg>';
 
 var T = {
-  title: "\u05d6\u05de\u05d9\u05e0\u05d5\u05ea \u05de\u05db\u05e9\u05d9\u05e8\u05d9\u05dd \u2013 \u05de\u05e2\u05d1\u05d3\u05d4 (v16)",
+  title: "\u05d6\u05de\u05d9\u05e0\u05d5\u05ea \u05de\u05db\u05e9\u05d9\u05e8\u05d9\u05dd \u2013 \u05de\u05e2\u05d1\u05d3\u05d4 (v17)",
   casting: "\u05e2\u05de\u05d3\u05ea \u05d9\u05e6\u05d9\u05e7\u05d4",
   polishing: "\u05de\u05db\u05d5\u05e0\u05ea \u05dc\u05d9\u05d8\u05d5\u05e9",
   other: "\u05d0\u05d7\u05e8",
@@ -154,6 +157,8 @@ var T = {
   free: "\u05e4\u05e0\u05d5\u05d9 \u05db\u05dc \u05d4\u05d9\u05d5\u05dd",
   del: "\u05de\u05d7\u05e7",
   edit: "\u05e2\u05e8\u05d5\u05da",
+  doneBadge: "\ud83d\udd12 \u05d1\u05d5\u05e6\u05e2",
+  doneLockedMsg: "\u05e0\u05d9\u05e1\u05d5\u05d9 \u05d6\u05d4 \u05db\u05d1\u05e8 \u05d1\u05d5\u05e6\u05e2 \u05d5\u05e9\u05de\u05d5\u05e8 \u05d1\u05d9\u05d5\u05de\u05df \u05dc\u05ea\u05d9\u05e2\u05d5\u05d3 \u05d1\u05dc\u05d1\u05d3 (\u05dc\u05d0 \u05e0\u05d9\u05ea\u05df \u05dc\u05e2\u05e8\u05d5\u05da \u05d0\u05d5 \u05dc\u05de\u05d7\u05d5\u05e7).",
   ilanTitle: "\u05d4\u05dc\u05d5\"\u05d6 \u05e9\u05dc \u05d0\u05d9\u05dc\u05df (\u05de\u05e0\u05d4\u05dc \u05de\u05e2\u05d1\u05d3\u05d4)",
   noIlan: "\u05d0\u05d9\u05df \u05d1\u05e7\u05e9\u05d5\u05ea \u05e2\u05d6\u05e8\u05d4 \u05de\u05d0\u05d9\u05dc\u05df \u05d1\u05d9\u05d5\u05dd \u05d6\u05d4",
   appBtn: "\u05d0\u05e9\u05e8 \u05d4\u05d2\u05e2\u05d4",
@@ -187,9 +192,18 @@ var T = {
   errE: "\u05d4\u05de\u05db\u05e9\u05d9\u05e8 \u05ea\u05e4\u05d5\u05e1 \u05e2\u05dc \u05d9\u05d3\u05d9 ",
   errI: "\u05d0\u05d9\u05dc\u05df \u05db\u05d1\u05e8 \u05de\u05e9\u05d5\u05d1\u05e5 \u05dc-",
   calTitle: "\u05d4\u05d5\u05e1\u05e4\u05d4 \u05dc\u05d9\u05d5\u05de\u05df \u05d1\u05dc\u05d7\u05d9\u05e6\u05d4 \u05d0\u05d7\u05ea",
+  calEditTitle: "\ud83d\udd04 \u05e2\u05d3\u05db\u05d5\u05df \u05d4\u05d0\u05d9\u05e8\u05d5\u05e2 \u05d1\u05d9\u05d5\u05de\u05df (Outlook / Google)",
+  calEditSub: "\u05d4\u05d0\u05d9\u05e8\u05d5\u05e2 \u05e2\u05d5\u05d3\u05db\u05df \u05d1\u05de\u05e2\u05e8\u05db\u05ea! \u05d0\u05dd \u05d4\u05d5\u05d0 \u05e9\u05de\u05d5\u05e8 \u05d0\u05e6\u05dc\u05da \u05d1\u05d9\u05d5\u05de\u05df, \u05e2\u05d3\u05db\u05df \u05d0\u05d5\u05ea\u05d5 \u05db\u05e2\u05ea \u05db\u05d3\u05d9 \u05e9\u05d4\u05db\u05dc \u05d9\u05d9\u05e9\u05d0\u05e8 \u05de\u05e1\u05d5\u05e0\u05db\u05e8\u05df:",
+  calPrevLbl: "\u05de\u05d5\u05e2\u05d3 \u05e7\u05d5\u05d3\u05dd (\u05dc\u05e4\u05e0\u05d9 \u05d4\u05e2\u05e8\u05d9\u05db\u05d4):",
+  calNewLbl: "\u05de\u05d5\u05e2\u05d3 \u05de\u05e2\u05d5\u05d3\u05db\u05df (\u05d7\u05d3\u05e9):",
   out365: "\ud83d\udcc5 \u05d4\u05d5\u05e1\u05e3 \u05d9\u05e9\u05d9\u05e8\u05d5\u05ea \u05dc-Outlook (BGU / Office 365)",
+  out365Edit: "\ud83d\udcc5 \u05e2\u05d3\u05db\u05df \u05d1-Outlook (BGU / Office 365)",
   outLive: "\ud83d\udce7 \u05d4\u05d5\u05e1\u05e3 \u05d9\u05e9\u05d9\u05e8\u05d5\u05ea \u05dc-Outlook (\u05d7\u05e9\u05d1\u05d5\u05df \u05e4\u05e8\u05d8\u05d9)",
+  outLiveEdit: "\ud83d\udce7 \u05e2\u05d3\u05db\u05df \u05d1-Outlook (\u05d7\u05e9\u05d1\u05d5\u05df \u05e4\u05e8\u05d8\u05d9)",
+  icsBtnNew: "\ud83d\udce5 \u05e7\u05d5\u05d1\u05e5 \u05d9\u05d5\u05de\u05df \u05d7\u05db\u05dd ל-Outlook (.ics)",
+  icsBtnEdit: "\ud83d\udd04 \u05e2\u05d3\u05db\u05df \u05d0\u05d9\u05e8\u05d5\u05e2 \u05e7\u05d9\u05d9\u05dd \u05d1-Outlook (\u05e7\u05d5\u05d1\u05e5 .ics)",
   gCal: "\ud83c\udf10 \u05d4\u05d5\u05e1\u05e3 \u05d9\u05e9\u05d9\u05e8\u05d5\u05ea \u05dc-Google Calendar",
+  gCalEdit: "\ud83c\udf10 \u05e2\u05d3\u05db\u05df \u05d1-Google Calendar",
   outBtnShort: "\ud83d\udcc5 \u05d4\u05d5\u05e1\u05e3 \u05dc-Outlook",
   labLoc: "\u05de\u05e2\u05d1\u05d3\u05d4",
   boardTitle: "\u05dc\u05d5\u05d7 \u05d4\u05d5\u05d3\u05e2\u05d5\u05ea \u2013 \u05d0\u05d9\u05dc\u05df",
@@ -321,6 +335,7 @@ function normalizeBooking(it, fallbackIdx) {
     ilanApproved: !!(it.ilanApproved || it.ok),
     raNeeded: Number(it.raNeeded || 0),
     raList: Array.isArray(it.raList) ? it.raList : [],
+    seq: Number(it.seq || 0),
     updatedAt: Number(it.updatedAt || 1000)
   };
 }
@@ -332,7 +347,7 @@ function loadMergedBookings() {
       map[INIT[i].id] = normalizeBooking(INIT[i], i);
     }
   }
-  var keys = ["lab_v5", "lab_v6", "lab_v7", "lab_v8", "lab_v9", "lab_v10", "lab_v11", "lab_v12", "lab_v13", "lab_v14", "lab_v15", "lab_v16"];
+  var keys = ["lab_v5", "lab_v6", "lab_v7", "lab_v8", "lab_v9", "lab_v10", "lab_v11", "lab_v12", "lab_v13", "lab_v14", "lab_v15", "lab_v16", "lab_v17"];
   for (var k = 0; k < keys.length; k++) {
     try {
       var raw = localStorage.getItem(keys[k]);
@@ -388,6 +403,8 @@ var S = {
   modal: false,
   editId: null,
   calItem: null,
+  calPrevItem: null,
+  calIsEdit: false,
   raModalId: null,
   raDraftName: "",
   err: "",
@@ -412,6 +429,23 @@ function isUserTyping() {
   if (!el) return false;
   var tag = el.tagName ? el.tagName.toLowerCase() : "";
   return tag === "input" || tag === "textarea" || tag === "select";
+}
+
+function mins(t) {
+  if (!t) return 0;
+  var p = t.split(":");
+  return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+}
+
+// בדיקה האם ניסוי כבר התקיים (שבועות קודמים / ימים קודמים / שעת סיום שכבר חלפה היום)
+function isBookingDone(b) {
+  if (!b || !b.date) return false;
+  var now = new Date();
+  var todayIso = fmtIso(now);
+  if (b.date < todayIso) return true;
+  if (b.date > todayIso) return false;
+  var nowMins = now.getHours() * 60 + now.getMinutes();
+  return mins(b.endTime || "23:59") <= nowMins;
 }
 
 function renderAvatarHtml() {
@@ -447,6 +481,7 @@ window.uploadAvatarFile = function(ev) {
 
 function saveLocalOnly() {
   try {
+    localStorage.setItem("lab_v17", JSON.stringify(S.list));
     localStorage.setItem("lab_v16", JSON.stringify(S.list));
     localStorage.setItem("lab_v15", JSON.stringify(S.list));
     localStorage.setItem("lab_v14", JSON.stringify(S.list));
@@ -455,13 +490,8 @@ function saveLocalOnly() {
   } catch (e) {}
 }
 
-// בניית מטען (Payload) חסכוני שמונע חריגה ממגבלת 4KB של ntfy.sh ושומר תאימות לאחור
+// בניית מטען (Payload) ששומר גם את כל הניסויים משבועות קודמים לתיעוד וגם מונע חריגה מ-4KB
 function buildPayload() {
-  var cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - 21);
-  var cutoffIso = fmtIso(cutoffDate);
-
-  // מסננים החוצה שיבוצים ישנים מלפני יותר מ-3 שבועות רק אם החבילה מתקרבת למגבלת 4KB
   var fullPayload = {
     cid: CLIENT_ID,
     ts: Date.now(),
@@ -471,39 +501,38 @@ function buildPayload() {
   };
 
   var encodedFull = toB64(fullPayload);
-  if (encodedFull.length <= 3800) {
+  if (encodedFull.length <= 3850) {
     return encodedFull;
   }
 
-  // אם החבילה גדולה מ-3800 תווים, נשלח בענן רק שיבוצים רלוונטיים (3 שבועות אחורה ומעלה)
-  var recentList = S.list.filter(function(b) {
-    return b && b.date >= cutoffIso;
+  // דחיסה קומפקטית ששומרת על כל הניסויים (כולל שבועות קודמים) בתוך מגבלת 4KB
+  var sortedAll = S.list.slice().sort(function(a, b) {
+    return (b.date || "").localeCompare(a.date || "");
   });
-  var trimmedPayload = {
-    cid: CLIENT_ID,
-    ts: Date.now(),
-    list: recentList,
-    deletedIds: S.deletedIds,
-    notes: S.notes.slice(0, 15)
-  };
-  var encodedTrimmed = toB64(trimmedPayload);
-  if (encodedTrimmed.length <= 3950) {
-    return encodedTrimmed;
-  }
-
-  // דחיסה נוספת במקרה של עשרות שיבוצים עתידיים במקביל
-  var compactItems = recentList.map(function(b) {
+  var compactItems = sortedAll.map(function(b) {
     return [
       b.id, b.equipmentId, b.date, b.startTime, b.endTime,
       b.studentName, b.experiment || "", b.needsIlan ? 1 : 0,
-      b.ilanApproved ? 1 : 0, b.raNeeded || 0, b.raList || [], b.updatedAt || 1000
+      b.ilanApproved ? 1 : 0, b.raNeeded || 0, b.raList || [], b.updatedAt || 1000, b.seq || 0
     ];
   });
-  return "BGU16:" + JSON.stringify({
+  var bgu16 = "BGU16:" + JSON.stringify({
     cid: CLIENT_ID,
     ts: Date.now(),
     cList: compactItems,
     del: Object.keys(S.deletedIds).slice(-120),
+    notes: S.notes.slice(0, 12)
+  });
+  if (bgu16.length <= 3950) {
+    return bgu16;
+  }
+
+  // אם הצטברו עשרות רבות של ניסויים לאורך חודשים, שומרים את כל ההיסטוריה ב-localStorage ומשדרים את ה-45 האחרונים
+  return "BGU16:" + JSON.stringify({
+    cid: CLIENT_ID,
+    ts: Date.now(),
+    cList: compactItems.slice(0, 45),
+    del: Object.keys(S.deletedIds).slice(-80),
     notes: S.notes.slice(0, 10)
   });
 }
@@ -530,7 +559,8 @@ function fromB64(str) {
             expList.push({
               id: a[0], equipmentId: a[1], date: a[2], startTime: a[3], endTime: a[4],
               studentName: a[5], experiment: a[6], needsIlan: !!a[7], ilanApproved: !!a[8],
-              raNeeded: Number(a[9] || 0), raList: Array.isArray(a[10]) ? a[10] : [], updatedAt: Number(a[11] || 1000)
+              raNeeded: Number(a[9] || 0), raList: Array.isArray(a[10]) ? a[10] : [],
+              updatedAt: Number(a[11] || 1000), seq: Number(a[12] || 0)
             });
           }
         }
@@ -584,7 +614,6 @@ function hasLocalChangesMissingFromCloud() {
     var lb = S.list[i];
     if (!lb || S.deletedIds[lb.id]) continue;
     var lTs = Number(lb.updatedAt || 1000);
-    // בודקים רק פריטים שנוצרו או נערכו על ידי משתמש (updatedAt > 1000)
     if (lTs > 1000) {
       var rTs = remoteKnownItems[lb.id] || 0;
       if (lTs > rTs) return true;
@@ -608,6 +637,12 @@ function mergeRemoteState(remote, skipRender) {
   if (remote.deletedIds) {
     for (var dId in remote.deletedIds) {
       if (remote.deletedIds.hasOwnProperty(dId) && !S.deletedIds[dId]) {
+        // הגנה גם בסנכרון: לא מוחקים ניסוי שכבר בוצע בעבר ושמור לתיעוד
+        var localItem = null;
+        for (var li = 0; li < S.list.length; li++) {
+          if (S.list[li].id === dId) { localItem = S.list[li]; break; }
+        }
+        if (localItem && isBookingDone(localItem)) continue;
         S.deletedIds[dId] = true;
         changed = true;
       }
@@ -687,7 +722,7 @@ function mergeRemoteState(remote, skipRender) {
 }
 
 // =========================================================================
-// מנגנון סנכרון מתוקן (ללא הצפות 429, עם תמיכה מלאה ב-MQTT + ntfy + BroadcastChannel)
+// מנגנון סנכרון (MQTT + ntfy + BroadcastChannel)
 // =========================================================================
 var SYNC_TOPIC = "bgu_ilan_lab_v15_sync";
 var mqttClients = [];
@@ -711,7 +746,7 @@ try {
 } catch (e) {}
 
 window.addEventListener("storage", function(ev) {
-  if (ev.key === "lab_v16" || ev.key === "lab_del_v10" || ev.key === "lab_notes_v1") {
+  if (ev.key === "lab_v17" || ev.key === "lab_v16" || ev.key === "lab_del_v10" || ev.key === "lab_notes_v1") {
     try {
       S.deletedIds = JSON.parse(localStorage.getItem("lab_del_v10") || "{}");
       SAVED_DEL_IDS = S.deletedIds;
@@ -818,7 +853,6 @@ window.pullCloudHistory = function(forceFull) {
       if (anyChanged) {
         saveLocalOnly();
       }
-      // אם יש שינויים מקומיים שטרם נשלחו, או שבטעינה הראשונית מתברר שהענן התרוקן (אחרי 12 שעות ב-ntfy)
       var shouldReseed = false;
       if (!didInitialReseedCheck && sinceParam === "all") {
         didInitialReseedCheck = true;
@@ -861,7 +895,6 @@ function connectSseStream() {
       } catch (e) {}
     };
     sseSource.onerror = function() {
-      // חיבור מחדש אוטומטי אם הזרם נסגר
       if (sseSource && sseSource.readyState === 2) {
         setTimeout(connectSseStream, 10000);
       }
@@ -870,10 +903,8 @@ function connectSseStream() {
 }
 
 function initRealtimeStreams() {
-  // 1. חיבור SSE בזמן אמת בפורט 443
   connectSseStream();
 
-  // 2. חיבור לשרתי MQTT ציבוריים אמינים עם שמירת מצב (Retained State) וללא לולאת הדהוד
   if (typeof mqtt !== "undefined") {
     var brokers = [
       "wss://broker.emqx.io:8084/mqtt",
@@ -884,7 +915,7 @@ function initRealtimeStreams() {
       (function(url) {
         try {
           var client = mqtt.connect(url, {
-            clientId: "bgu16_" + Math.random().toString(16).slice(2, 10),
+            clientId: "bgu17_" + Math.random().toString(16).slice(2, 10),
             clean: true,
             connectTimeout: 6000,
             reconnectPeriod: 6000
@@ -910,7 +941,6 @@ function initRealtimeStreams() {
     }
   }
 
-  // 3. סנכרון חכם כשחוזרים ללשונית (עם הגבלת קצב למניעת חסימת 429)
   window.addEventListener("focus", function() { window.pullCloudHistory(false); });
   document.addEventListener("visibilitychange", function() {
     if (!document.hidden) window.pullCloudHistory(false);
@@ -955,6 +985,12 @@ window.delNote = function(id) {
 
 window.openRaJoin = function(bookingId, ev) {
   if (ev) ev.stopPropagation();
+  for (var i = 0; i < S.list.length; i++) {
+    if (S.list[i].id === bookingId && isBookingDone(S.list[i])) {
+      alert(T.doneLockedMsg);
+      return;
+    }
+  }
   S.raModalId = bookingId;
   S.raDraftName = localStorage.getItem("last_ra_name") || "";
   draw();
@@ -975,6 +1011,12 @@ window.submitRaJoin = function(ev) {
   for (var i = 0; i < S.list.length; i++) {
     var b = S.list[i];
     if (b.id === S.raModalId) {
+      if (isBookingDone(b)) {
+        alert(T.doneLockedMsg);
+        S.raModalId = null;
+        draw();
+        return;
+      }
       if (!Array.isArray(b.raList)) b.raList = [];
       if (b.raList.indexOf(name) === -1 && b.raList.length < (b.raNeeded || 0)) {
         b.raList.push(name);
@@ -990,9 +1032,15 @@ window.removeRaHelper = function(bookingId, helperName, ev) {
   if (ev) ev.stopPropagation();
   for (var i = 0; i < S.list.length; i++) {
     var b = S.list[i];
-    if (b.id === bookingId && Array.isArray(b.raList)) {
-      b.raList = b.raList.filter(function(x) { return x !== helperName; });
-      b.updatedAt = nextTimestamp(b.updatedAt);
+    if (b.id === bookingId) {
+      if (isBookingDone(b)) {
+        alert(T.doneLockedMsg);
+        return;
+      }
+      if (Array.isArray(b.raList)) {
+        b.raList = b.raList.filter(function(x) { return x !== helperName; });
+        b.updatedAt = nextTimestamp(b.updatedAt);
+      }
     }
   }
   saveAndPush();
@@ -1009,11 +1057,20 @@ function cleanDt(dateStr, timeStr) {
   return dateStr.replace(/-/g, "") + "T" + timeStr.replace(":", "") + "00";
 }
 
-function makeGCalUrl(b) {
+function buildCalDetailsText(b, prevB) {
+  var parts = [];
+  if (b.experiment) parts.push(b.experiment);
+  if (b.needsIlan) parts.push(T.needIlan);
+  if (prevB) {
+    parts.push("עודכן ממועד קודם: " + getEqName(prevB.equipmentId) + " | " + prevB.date + " (" + prevB.startTime + "-" + prevB.endTime + ")");
+  }
+  return parts.join(" | ");
+}
+
+function makeGCalUrl(b, prevB) {
   var eqName = getEqName(b.equipmentId);
-  var title = eqName + " - " + b.studentName;
-  var details = (b.experiment ? b.experiment + " | " : "") +
-    (b.needsIlan ? T.needIlan : "");
+  var title = (prevB ? "[עודכן] " : "") + eqName + " - " + b.studentName;
+  var details = buildCalDetailsText(b, prevB);
   var dates = cleanDt(b.date, b.startTime) + "/" +
     cleanDt(b.date, b.endTime);
   return "https://calendar.google.com/calendar/render?action=TEMPLATE" +
@@ -1023,11 +1080,10 @@ function makeGCalUrl(b) {
     "&location=" + encodeURIComponent(T.labLoc);
 }
 
-function makeOutlook365Url(b) {
+function makeOutlook365Url(b, prevB) {
   var eqName = getEqName(b.equipmentId);
-  var title = eqName + " - " + b.studentName;
-  var details = (b.experiment ? b.experiment + " | " : "") +
-    (b.needsIlan ? T.needIlan : "");
+  var title = (prevB ? "[עודכן] " : "") + eqName + " - " + b.studentName;
+  var details = buildCalDetailsText(b, prevB);
   var startIso = b.date + "T" + b.startTime + ":00";
   var endIso = b.date + "T" + b.endTime + ":00";
   return "https://outlook.office.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent" +
@@ -1038,11 +1094,10 @@ function makeOutlook365Url(b) {
     "&location=" + encodeURIComponent(T.labLoc);
 }
 
-function makeOutlookLiveUrl(b) {
+function makeOutlookLiveUrl(b, prevB) {
   var eqName = getEqName(b.equipmentId);
-  var title = eqName + " - " + b.studentName;
-  var details = (b.experiment ? b.experiment + " | " : "") +
-    (b.needsIlan ? T.needIlan : "");
+  var title = (prevB ? "[עודכן] " : "") + eqName + " - " + b.studentName;
+  var details = buildCalDetailsText(b, prevB);
   var startIso = b.date + "T" + b.startTime + ":00";
   var endIso = b.date + "T" + b.endTime + ":00";
   return "https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent" +
@@ -1053,11 +1108,55 @@ function makeOutlookLiveUrl(b) {
     "&location=" + encodeURIComponent(T.labLoc);
 }
 
+// הורדת קובץ .ics תקני עם UID קבוע ו-SEQUENCE מתקדם שמעדכן אוטומטית את האירוע הקיים ב-Outlook
+window.downloadIcsFile = function() {
+  var b = S.calItem;
+  if (!b) return;
+  var eqName = getEqName(b.equipmentId);
+  var title = eqName + " - " + b.studentName;
+  var details = buildCalDetailsText(b, S.calIsEdit ? S.calPrevItem : null);
+  var seq = Number(b.seq || (S.calIsEdit ? 1 : 0));
+  var dtStart = cleanDt(b.date, b.startTime);
+  var dtEnd = cleanDt(b.date, b.endTime);
+  var nowUtc = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+  var icsLines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//BGU Lab Schedule//HE",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    "UID:bgu-lab-booking-" + b.id + "@bgu.ac.il",
+    "SEQUENCE:" + seq,
+    "DTSTAMP:" + nowUtc,
+    "DTSTART:" + dtStart,
+    "DTEND:" + dtEnd,
+    "SUMMARY:" + title.replace(/[\r\n]/g, " "),
+    "DESCRIPTION:" + details.replace(/[\r\n]/g, " "),
+    "LOCATION:" + T.labLoc,
+    "STATUS:CONFIRMED",
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ];
+  var blob = new Blob([icsLines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "lab-booking-" + b.id + ".ics";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 2000);
+};
+
 window.openCalModal = function(id, ev) {
   if (ev) ev.stopPropagation();
   for (var i = 0; i < S.list.length; i++) {
     if (S.list[i].id === id) {
       S.calItem = S.list[i];
+      S.calPrevItem = null;
+      S.calIsEdit = false;
       draw();
       return;
     }
@@ -1066,6 +1165,8 @@ window.openCalModal = function(id, ev) {
 
 window.closeCalModal = function() {
   S.calItem = null;
+  S.calPrevItem = null;
+  S.calIsEdit = false;
   draw();
 };
 
@@ -1100,12 +1201,6 @@ function getDays(baseStr) {
     });
   }
   return out;
-}
-
-function mins(t) {
-  if (!t) return 0;
-  var p = t.split(":");
-  return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
 }
 
 function overlap(s1, e1, s2, e2) {
@@ -1158,6 +1253,10 @@ window.openEdit = function(id, ev) {
   for (var i = 0; i < S.list.length; i++) {
     var b = S.list[i];
     if (b.id === id) {
+      if (isBookingDone(b)) {
+        alert(T.doneLockedMsg);
+        return;
+      }
       S.err = "";
       S.editId = id;
       S.f = {
@@ -1185,6 +1284,12 @@ window.closeAdd = function() {
 
 window.delItem = function(id, ev) {
   if (ev) ev.stopPropagation();
+  for (var i = 0; i < S.list.length; i++) {
+    if (S.list[i].id === id && isBookingDone(S.list[i])) {
+      alert(T.doneLockedMsg);
+      return;
+    }
+  }
   S.deletedIds[id] = true;
   S.list = S.list.filter(function(x) {
     return x.id !== id;
@@ -1195,6 +1300,10 @@ window.delItem = function(id, ev) {
 window.okIlan = function(id) {
   for (var i = 0; i < S.list.length; i++) {
     if (S.list[i].id === id) {
+      if (isBookingDone(S.list[i])) {
+        alert(T.doneLockedMsg);
+        return;
+      }
       S.list[i].ilanApproved = !S.list[i].ilanApproved;
       S.list[i].updatedAt = nextTimestamp(S.list[i].updatedAt);
     }
@@ -1233,7 +1342,8 @@ window.saveForm = function(ev) {
     var b = S.list[i];
     if (S.editId && b.id === S.editId) continue;
     if (b.date === dt && overlap(st, et, b.startTime, b.endTime)) {
-      if (b.equipmentId === eq) {
+      // בשורת "אחר" (other) אין חסימת חפיפה כי זה לא מכשיר בודד
+      if (eq !== "other" && b.equipmentId === eq) {
         S.err = T.errE + b.studentName + " (" + b.startTime + "-" + b.endTime + ")";
         draw();
         return;
@@ -1247,8 +1357,23 @@ window.saveForm = function(ev) {
   }
 
   if (S.editId) {
+    var editedBooking = null;
+    var prevBookingSnapshot = null;
     for (var j = 0; j < S.list.length; j++) {
       if (S.list[j].id === S.editId) {
+        if (isBookingDone(S.list[j])) {
+          S.err = T.doneLockedMsg;
+          draw();
+          return;
+        }
+        prevBookingSnapshot = {
+          equipmentId: S.list[j].equipmentId,
+          date: S.list[j].date,
+          startTime: S.list[j].startTime,
+          endTime: S.list[j].endTime,
+          studentName: S.list[j].studentName,
+          experiment: S.list[j].experiment || ""
+        };
         S.list[j].equipmentId = eq;
         S.list[j].date = dt;
         S.list[j].startTime = st;
@@ -1258,11 +1383,19 @@ window.saveForm = function(ev) {
         S.list[j].needsIlan = il;
         S.list[j].raNeeded = ra;
         if (!Array.isArray(S.list[j].raList)) S.list[j].raList = [];
+        S.list[j].seq = Number(S.list[j].seq || 0) + 1;
         S.list[j].updatedAt = nextTimestamp(S.list[j].updatedAt);
+        editedBooking = S.list[j];
       }
     }
     S.modal = false;
     S.editId = null;
+    // פתיחת חלון עדכון ל-Outlook / Google Calendar לאחר עריכת אירוע
+    if (editedBooking) {
+      S.calItem = editedBooking;
+      S.calPrevItem = prevBookingSnapshot;
+      S.calIsEdit = true;
+    }
     saveAndPush();
   } else {
     var newEntry = {
@@ -1277,28 +1410,35 @@ window.saveForm = function(ev) {
       ilanApproved: false,
       raNeeded: ra,
       raList: [],
+      seq: 0,
       updatedAt: Date.now()
     };
     S.list.push(newEntry);
     S.modal = false;
     S.calItem = newEntry;
+    S.calPrevItem = null;
+    S.calIsEdit = false;
     saveAndPush();
   }
 };
 
-function renderBookingRaBadges(b) {
+function renderBookingRaBadges(b, done) {
   var need = Number(b.raNeeded || 0);
   if (need <= 0) return "";
   var arr = Array.isArray(b.raList) ? b.raList : [];
   var isFull = arr.length >= need;
   var cls = isFull ? "tag-ra-full" : "tag-ra-open";
-  var h = '<div><span class="tag ' + cls + '" onclick="openRaJoin(\'' + b.id + '\',event)">';
-  h += T.raTagPrefix + arr.length + '/' + need + (isFull ? '' : ' (+)') + '</span></div>';
+  var clickAttr = done ? 'onclick="event.stopPropagation()"' : 'onclick="openRaJoin(\'' + b.id + '\',event)"';
+  var h = '<div><span class="tag ' + cls + '" ' + clickAttr + '>';
+  h += T.raTagPrefix + arr.length + '/' + need + (isFull || done ? '' : ' (+)') + '</span></div>';
   if (arr.length > 0) {
     h += '<div style="margin-top:3px">';
     for (var i = 0; i < arr.length; i++) {
       h += '<span class="ra-chip" onclick="event.stopPropagation()">' + arr[i];
-      h += ' <b style="color:#dc2626;cursor:pointer" onclick="removeRaHelper(\'' + b.id + '\',\'' + arr[i].replace(/'/g, "") + '\',event)">x</b></span>';
+      if (!done) {
+        h += ' <b style="color:#dc2626;cursor:pointer" onclick="removeRaHelper(\'' + b.id + '\',\'' + arr[i].replace(/'/g, "") + '\',event)">x</b>';
+      }
+      h += '</span>';
     }
     h += '</div>';
   }
@@ -1357,6 +1497,7 @@ function drawRaSideHtml(days) {
   } else {
     for (var i = 0; i < raEvents.length; i++) {
       var ev = raEvents[i];
+      var done = isBookingDone(ev);
       var dInfo = dayMap[ev.date];
       var arr = Array.isArray(ev.raList) ? ev.raList : [];
       var need = Number(ev.raNeeded || 0);
@@ -1373,12 +1514,18 @@ function drawRaSideHtml(days) {
       if (arr.length > 0) {
         h += '<div style="margin-top:6px">';
         for (var r = 0; r < arr.length; r++) {
-          h += '<span class="ra-chip">' + arr[r] + ' <b style="color:#dc2626;cursor:pointer" onclick="removeRaHelper(\'' + ev.id + '\',\'' + arr[r].replace(/'/g, "") + '\',event)">x</b></span>';
+          h += '<span class="ra-chip">' + arr[r];
+          if (!done) {
+            h += ' <b style="color:#dc2626;cursor:pointer" onclick="removeRaHelper(\'' + ev.id + '\',\'' + arr[r].replace(/'/g, "") + '\',event)">x</b>';
+          }
+          h += '</span>';
         }
         h += '</div>';
       }
 
-      if (!full) {
+      if (done) {
+        h += '<div style="margin-top:6px;font-size:12px;color:#64748b;font-weight:bold;text-align:center">' + T.doneBadge + '</div>';
+      } else if (!full) {
         h += '<button class="btn-main" style="width:100%;margin-top:8px;padding:7px;font-size:12.5px;background:#7c3aed" onclick="openRaJoin(\'' + ev.id + '\',event)">' + T.raJoinBtn + '</button>';
       } else {
         h += '<div style="margin-top:6px;font-size:12px;color:#0d9488;font-weight:bold;text-align:center">' + T.raFullBadge + '</div>';
@@ -1444,17 +1591,24 @@ function draw() {
         });
         for (var j = 0; j < cellItems.length; j++) {
           var b = cellItems[j];
-          h += '<div class="item ' + eq.cls + '" ';
-          h += 'onclick="openEdit(\'' + b.id + '\',event)">';
+          var done = isBookingDone(b);
+          h += '<div class="item ' + eq.cls + (done ? ' item-done' : '') + '" ';
+          h += 'onclick="' + (done ? 'event.stopPropagation()' : ('openEdit(\'' + b.id + '\',event)')) + '">';
           h += '<div class="row-top"><span>';
           h += b.startTime + '-' + b.endTime + '</span>';
           h += '<div class="act-btns">';
-          h += '<button class="cal-mini" onclick="openEdit(\'';
-          h += b.id + '\',event)" title="ערוך">\u270e</button>';
-          h += '<button class="cal-mini" onclick="openCalModal(\'';
-          h += b.id + '\',event)" title="הוסף ליומן">\ud83d\udcc5+</button>';
-          h += '<button class="del-btn" onclick="delItem(\'';
-          h += b.id + '\',event)" title="מחק">X</button></div></div>';
+          if (done) {
+            h += '<span class="done-badge" title="' + T.doneLockedMsg + '">' + T.doneBadge + '</span>';
+            h += '<button class="cal-mini" onclick="openCalModal(\'' + b.id + '\',event)" title="הוסף ליומן">\ud83d\udcc5+</button>';
+          } else {
+            h += '<button class="cal-mini" onclick="openEdit(\'';
+            h += b.id + '\',event)" title="ערוך">\u270e</button>';
+            h += '<button class="cal-mini" onclick="openCalModal(\'';
+            h += b.id + '\',event)" title="הוסף ליומן">\ud83d\udcc5+</button>';
+            h += '<button class="del-btn" onclick="delItem(\'';
+            h += b.id + '\',event)" title="מחק">X</button>';
+          }
+          h += '</div></div>';
           h += '<div style="font-size:14px"><b>' + b.studentName + '</b></div>';
           if (b.experiment) {
             h += '<div style="margin-top:2px">' + b.experiment + '</div>';
@@ -1464,7 +1618,7 @@ function draw() {
             var tt = b.ilanApproved ? T.ilanOk : T.needIlan;
             h += '<span class="tag ' + tc + '">' + tt + '</span>';
           }
-          h += renderBookingRaBadges(b);
+          h += renderBookingRaBadges(b, done);
           h += '</div>';
         }
         h += '<div class="add-hint">' + T.add + '</div></td>';
@@ -1495,18 +1649,25 @@ function draw() {
         var b2 = S.list[n];
         if (b2.date === S.dayIso && b2.equipmentId === eq2.id) {
           cnt++;
-          h += '<div class="item ' + eq2.cls + '" onclick="openEdit(\'' + b2.id + '\',event)">';
+          var done2 = isBookingDone(b2);
+          h += '<div class="item ' + eq2.cls + (done2 ? ' item-done' : '') + '" onclick="' + (done2 ? 'event.stopPropagation()' : ('openEdit(\'' + b2.id + '\',event)')) + '">';
           h += '<div class="row-top"><span>' + b2.startTime;
           h += '-' + b2.endTime + ' | ' + b2.studentName + '</span>';
           h += '<div class="act-btns">';
-          h += '<button class="cal-mini" onclick="openEdit(\'';
-          h += b2.id + '\',event)">' + T.edit + '</button>';
-          h += '<button class="cal-mini" onclick="openCalModal(\'';
-          h += b2.id + '\',event)">\ud83d\udcc5+</button>';
-          h += '<button class="del-btn" onclick="delItem(\'';
-          h += b2.id + '\',event)">' + T.del + '</button></div></div>';
+          if (done2) {
+            h += '<span class="done-badge">' + T.doneBadge + '</span>';
+            h += '<button class="cal-mini" onclick="openCalModal(\'' + b2.id + '\',event)">\ud83d\udcc5+</button>';
+          } else {
+            h += '<button class="cal-mini" onclick="openEdit(\'';
+            h += b2.id + '\',event)">' + T.edit + '</button>';
+            h += '<button class="cal-mini" onclick="openCalModal(\'';
+            h += b2.id + '\',event)">\ud83d\udcc5+</button>';
+            h += '<button class="del-btn" onclick="delItem(\'';
+            h += b2.id + '\',event)">' + T.del + '</button>';
+          }
+          h += '</div></div>';
           if (b2.experiment) h += '<div>' + b2.experiment + '</div>';
-          h += renderBookingRaBadges(b2);
+          h += renderBookingRaBadges(b2, done2);
           h += '</div>';
         }
       }
@@ -1534,20 +1695,26 @@ function draw() {
         var b3 = S.list[q];
         if (b3.date === dObj.iso && b3.needsIlan) {
           ic++;
-          var directOutUrl = makeOutlook365Url(b3);
-          h += '<div class="item" style="display:flex;';
+          var done3 = isBookingDone(b3);
+          var directOutUrl = makeOutlook365Url(b3, null);
+          h += '<div class="item' + (done3 ? ' item-done' : '') + '" style="display:flex;';
           h += 'justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">';
-          h += '<div onclick="openEdit(\'' + b3.id + '\',event)"><b>' + b3.startTime + '-' + b3.endTime + '</b> ';
+          h += '<div onclick="' + (done3 ? 'event.stopPropagation()' : ('openEdit(\'' + b3.id + '\',event)')) + '"><b>' + b3.startTime + '-' + b3.endTime + '</b> ';
           h += ' | ' + b3.studentName + ' (' + getEqName(b3.equipmentId) + ')';
           if (b3.experiment) h += '<div>' + b3.experiment + '</div>';
-          h += renderBookingRaBadges(b3);
+          h += renderBookingRaBadges(b3, done3);
           h += '</div><div style="display:flex;gap:6px;align-items:center">';
           h += '<a href="' + directOutUrl + '" target="_blank" class="btn-main" style="background:#0078d4;padding:6px 10px;font-size:12px" onclick="event.stopPropagation()">' + T.outBtnShort + '</a>';
-          h += '<button class="btn-main" ';
-          h += 'style="padding:6px 10px;font-size:12px;background:' + (b3.ilanApproved ? '#059669' : '#f59e0b');
-          h += '" onclick="okIlan(\'' + b3.id + '\')">';
-          h += (b3.ilanApproved ? T.ilanOk : T.appBtn);
-          h += '</button></div></div>';
+          if (done3) {
+            h += '<span class="done-badge" style="padding:6px 10px;font-size:12px">' + (b3.ilanApproved ? T.ilanOk : T.doneBadge) + '</span>';
+          } else {
+            h += '<button class="btn-main" ';
+            h += 'style="padding:6px 10px;font-size:12px;background:' + (b3.ilanApproved ? '#059669' : '#f59e0b');
+            h += '" onclick="okIlan(\'' + b3.id + '\')">';
+            h += (b3.ilanApproved ? T.ilanOk : T.appBtn);
+            h += '</button>';
+          }
+          h += '</div></div>';
         }
       }
       if (ic === 0) {
@@ -1655,27 +1822,43 @@ function draw() {
   }
 
   if (S.calItem) {
-    var gUrl = makeGCalUrl(S.calItem);
-    var out365Url = makeOutlook365Url(S.calItem);
-    var outLiveUrl = makeOutlookLiveUrl(S.calItem);
+    var prevB = S.calIsEdit ? S.calPrevItem : null;
+    var gUrl = makeGCalUrl(S.calItem, prevB);
+    var out365Url = makeOutlook365Url(S.calItem, prevB);
+    var outLiveUrl = makeOutlookLiveUrl(S.calItem, prevB);
     h += '<div class="modal-bg"><div class="modal">';
-    h += '<div class="row-top" style="margin-bottom:12px">';
-    h += '<b style="font-size:16px">' + T.calTitle + '</b>';
+    h += '<div class="row-top" style="margin-bottom:10px">';
+    h += '<b style="font-size:16px">' + (S.calIsEdit ? T.calEditTitle : T.calTitle) + '</b>';
     h += '<button class="del-btn" onclick="closeCalModal()">X</button></div>';
-    h += '<div style="font-size:14px;margin-bottom:14px;background:#f8fafc;padding:10px;border-radius:8px">';
+    if (S.calIsEdit) {
+      h += '<div style="font-size:13px;color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe;padding:9px;border-radius:8px;margin-bottom:10px">' + T.calEditSub + '</div>';
+      if (prevB) {
+        h += '<div style="font-size:12.5px;margin-bottom:8px;background:#fef2f2;border:1px solid #fecaca;padding:8px 10px;border-radius:8px;color:#991b1b">';
+        h += '<div><b>' + T.calPrevLbl + '</b></div>';
+        h += '<div style="text-decoration:line-through">' + getEqName(prevB.equipmentId) + ' | ' + prevB.studentName + ' | ' + prevB.date + ' (' + prevB.startTime + '-' + prevB.endTime + ')</div>';
+        h += '</div>';
+      }
+    }
+    h += '<div style="font-size:13.5px;margin-bottom:14px;background:#ecfdf5;border:1px solid #a7f3d0;padding:10px;border-radius:8px;color:#065f46">';
+    if (S.calIsEdit) h += '<div style="font-size:12px;margin-bottom:2px"><b>' + T.calNewLbl + '</b></div>';
     h += '<b>' + getEqName(S.calItem.equipmentId) + '</b> | ';
     h += S.calItem.studentName + '<br>';
     h += S.calItem.date + ' (' + S.calItem.startTime + '-';
-    h += S.calItem.endTime + ')</div>';
+    h += S.calItem.endTime + ')';
+    if (S.calItem.experiment) h += '<br>' + S.calItem.experiment;
+    h += '</div>';
     h += '<a href="' + out365Url + '" target="_blank" class="btn-main" ';
     h += 'style="width:100%;margin-bottom:8px;background:#0078d4" onclick="closeCalModal()">';
-    h += T.out365 + '</a>';
+    h += (S.calIsEdit ? T.out365Edit : T.out365) + '</a>';
+    h += '<button type="button" class="btn-main" ';
+    h += 'style="width:100%;margin-bottom:8px;background:#4f46e5" onclick="downloadIcsFile()">';
+    h += (S.calIsEdit ? T.icsBtnEdit : T.icsBtnNew) + '</button>';
     h += '<a href="' + outLiveUrl + '" target="_blank" class="btn-main" ';
     h += 'style="width:100%;margin-bottom:8px;background:#0f172a" onclick="closeCalModal()">';
-    h += T.outLive + '</a>';
+    h += (S.calIsEdit ? T.outLiveEdit : T.outLive) + '</a>';
     h += '<a href="' + gUrl + '" target="_blank" class="btn-main" ';
     h += 'style="width:100%;margin-bottom:8px;background:#059669" onclick="closeCalModal()">';
-    h += T.gCal + '</a>';
+    h += (S.calIsEdit ? T.gCalEdit : T.gCal) + '</a>';
     h += '<button class="btn-sec" style="width:100%;padding:10px" ';
     h += 'onclick="closeCalModal()">' + T.cancel + '</button>';
     h += '</div></div>';
