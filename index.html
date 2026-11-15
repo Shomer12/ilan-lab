@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lab Schedule v14</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Lab Schedule v16</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.3.5/mqtt.min.js"></script>
 <style>
   * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
@@ -11,10 +14,12 @@
   .hdr { background: #0f172a; color: #fff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 10px; }
   .hdr-title { display: flex; align-items: center; gap: 14px; }
   .hdr h1 { margin: 0; font-size: 21px; }
-  .sync-badge { font-size: 12px; color: #cbd5e1; display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .sync-badge { font-size: 12px; color: #cbd5e1; display: flex; align-items: center; gap: 6px; margin-top: 2px; cursor: pointer; user-select: none; }
+  .sync-badge:hover { color: #fff; }
   .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
   .dot-ok { background: #10b981; box-shadow: 0 0 6px #10b981; }
-  .dot-wait { background: #f59e0b; }
+  .dot-wait { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+  .dot-err { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
   .ilan-avatar { width: 52px; height: 52px; border-radius: 50%; overflow: hidden; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.25); flex-shrink: 0; cursor: pointer; background: #4dd0e1; display: flex; align-items: center; justify-content: center; }
   .ilan-avatar img, .ilan-avatar svg { width: 100%; height: 100%; object-fit: cover; display: block; }
   .btn-main { background: #2563eb; color: #fff; border: 0; padding: 10px 18px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
@@ -119,7 +124,7 @@ var ILAN_SVG = '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">' 
   '</svg>';
 
 var T = {
-  title: "\u05d6\u05de\u05d9\u05e0\u05d5\u05ea \u05de\u05db\u05e9\u05d9\u05e8\u05d9\u05dd \u2013 \u05de\u05e2\u05d1\u05d3\u05d4 (v14)",
+  title: "\u05d6\u05de\u05d9\u05e0\u05d5\u05ea \u05de\u05db\u05e9\u05d9\u05e8\u05d9\u05dd \u2013 \u05de\u05e2\u05d1\u05d3\u05d4 (v16)",
   casting: "\u05e2\u05de\u05d3\u05ea \u05d9\u05e6\u05d9\u05e7\u05d4",
   polishing: "\u05de\u05db\u05d5\u05e0\u05ea \u05dc\u05d9\u05d8\u05d5\u05e9",
   other: "\u05d0\u05d7\u05e8",
@@ -192,8 +197,9 @@ var T = {
   addNotePh: "\u05db\u05ea\u05d5\u05d1 \u05d4\u05d5\u05d3\u05e2\u05d4 \u05d7\u05d3\u05e9\u05d4 \u05dc\u05dc\u05d5\u05d7...",
   addNoteBtn: "\u05e4\u05e8\u05e1\u05dd \u05d1\u05dc\u05d5\u05d7",
   defNote1: "\u05e0\u05d0 \u05dc\u05ea\u05d0\u05dd \u05d9\u05e6\u05d9\u05e7\u05d5\u05ea \u05d5\u05d1\u05d3\u05d9\u05e7\u05d5\u05ea \u05de\u05e8\u05d0\u05e9 \u05d5\u05dc\u05e0\u05e7\u05d5\u05ea \u05d0\u05ea \u05e2\u05de\u05d3\u05ea \u05d4\u05d9\u05e6\u05d9\u05e7\u05d4 \u05d1\u05e1\u05d9\u05d5\u05dd.",
-  syncOk: "\u05de\u05d7\u05d5\u05d1\u05e8 \u05dc\u05e1\u05e0\u05db\u05e8\u05d5\u05df \u05d7\u05d9 \u05d1\u05d6\u05de\u05df \u05d0\u05de\u05ea",
-  syncWait: "\u05de\u05ea\u05d7\u05d1\u05e8 \u05dc\u05e9\u05e8\u05ea \u05e1\u05e0\u05db\u05e8\u05d5\u05df..."
+  syncOk: "\u05de\u05d7\u05d5\u05d1\u05e8 \u05dc\u05e2\u05e0\u05df \u2022 ",
+  syncItems: " \u05e9\u05d9\u05d1\u05d5\u05e6\u05d9\u05dd (\u05dc\u05d7\u05e5 \u05dc\u05e1\u05e0\u05db\u05e8\u05d5\u05df)",
+  syncWait: "\u05de\u05e1\u05e0\u05db\u05e8\u05df \u05de\u05d5\u05dc \u05d4\u05e2\u05e0\u05df..."
 };
 
 var EQ = [
@@ -213,54 +219,57 @@ for (var th = 6; th <= 23; th++) {
 }
 TIMES.push("23:59");
 
+// מזהה ייחודי ללשונית הנוכחית כדי למנוע הדהוד (Echo Loop) של הודעות מעצמנו
+var CLIENT_ID = "c_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+
 var INIT = [
   {
     id: "1", equipmentId: "controls", date: "2026-10-25",
     startTime: "13:00", endTime: "20:00",
     studentName: T.ido, experiment: T.exp1,
-    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: [], updatedAt: 1000
   },
   {
     id: "2", equipmentId: "controls", date: "2026-10-26",
     startTime: "08:00", endTime: "10:00",
     studentName: T.alon, experiment: T.exp2,
-    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: [], updatedAt: 1000
   },
   {
     id: "3", equipmentId: "casting", date: "2026-10-26",
     startTime: "10:00", endTime: "13:00",
     studentName: T.bar, experiment: T.exp3,
-    needsIlan: true, ilanApproved: true, raNeeded: 2, raList: []
+    needsIlan: true, ilanApproved: true, raNeeded: 2, raList: [], updatedAt: 1000
   },
   {
     id: "4", equipmentId: "polishing", date: "2026-10-26",
     startTime: "10:00", endTime: "12:00",
     studentName: T.alon, experiment: T.exp4,
-    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: [], updatedAt: 1000
   },
   {
     id: "5", equipmentId: "casting", date: "2026-10-29",
     startTime: "10:00", endTime: "13:00",
     studentName: T.bar, experiment: T.exp5,
-    needsIlan: true, ilanApproved: false, raNeeded: 2, raList: []
+    needsIlan: true, ilanApproved: false, raNeeded: 2, raList: [], updatedAt: 1000
   },
   {
     id: "6", equipmentId: "controls", date: "2026-11-01",
     startTime: "09:00", endTime: "11:00",
     studentName: T.ortalGabi, experiment: T.expCubes,
-    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: [], updatedAt: 1000
   },
   {
     id: "7", equipmentId: "controls", date: "2026-11-03",
     startTime: "10:00", endTime: "12:00",
     studentName: T.ortalGabi, experiment: T.expCubes,
-    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: [], updatedAt: 1000
   },
   {
     id: "8", equipmentId: "actuators", date: "2026-11-01",
     startTime: "09:00", endTime: "11:00",
     studentName: T.dobi, experiment: T.expFlex,
-    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: []
+    needsIlan: false, ilanApproved: false, raNeeded: 0, raList: [], updatedAt: 1000
   }
 ];
 
@@ -297,14 +306,33 @@ try {
   SAVED_DEL_IDS = JSON.parse(localStorage.getItem("lab_del_v10") || "{}");
 } catch (e) {}
 
+function normalizeBooking(it, fallbackIdx) {
+  if (!it) return null;
+  var idStr = String(it.id || ("m" + (fallbackIdx || 0)));
+  return {
+    id: idStr,
+    equipmentId: it.equipmentId || it.eq || "controls",
+    date: it.date || it.dt || "2026-10-25",
+    startTime: it.startTime || it.st || "09:00",
+    endTime: it.endTime || it.et || "11:00",
+    studentName: it.studentName || it.name || "",
+    experiment: it.experiment || it.exp || "",
+    needsIlan: !!(it.needsIlan || it.ilan),
+    ilanApproved: !!(it.ilanApproved || it.ok),
+    raNeeded: Number(it.raNeeded || 0),
+    raList: Array.isArray(it.raList) ? it.raList : [],
+    updatedAt: Number(it.updatedAt || 1000)
+  };
+}
+
 function loadMergedBookings() {
   var map = {};
   for (var i = 0; i < INIT.length; i++) {
     if (!SAVED_DEL_IDS[INIT[i].id]) {
-      map[INIT[i].id] = INIT[i];
+      map[INIT[i].id] = normalizeBooking(INIT[i], i);
     }
   }
-  var keys = ["lab_v5", "lab_v6", "lab_v7", "lab_v8", "lab_v9", "lab_v10", "lab_v11", "lab_v12", "lab_v13", "lab_v14"];
+  var keys = ["lab_v5", "lab_v6", "lab_v7", "lab_v8", "lab_v9", "lab_v10", "lab_v11", "lab_v12", "lab_v13", "lab_v14", "lab_v15", "lab_v16"];
   for (var k = 0; k < keys.length; k++) {
     try {
       var raw = localStorage.getItem(keys[k]);
@@ -313,22 +341,10 @@ function loadMergedBookings() {
         if (Array.isArray(arr)) {
           for (var j = 0; j < arr.length; j++) {
             var it = arr[j];
+            if (!it) continue;
             var idStr = String(it.id || ("m" + j));
             if (SAVED_DEL_IDS[idStr] || it.deleted) continue;
-            var norm = {
-              id: idStr,
-              equipmentId: it.equipmentId || it.eq || "controls",
-              date: it.date || it.dt || "2026-10-25",
-              startTime: it.startTime || it.st || "09:00",
-              endTime: it.endTime || it.et || "11:00",
-              studentName: it.studentName || it.name || "",
-              experiment: it.experiment || it.exp || "",
-              needsIlan: !!(it.needsIlan || it.ilan),
-              ilanApproved: !!(it.ilanApproved || it.ok),
-              raNeeded: Number(it.raNeeded || 0),
-              raList: Array.isArray(it.raList) ? it.raList : [],
-              updatedAt: it.updatedAt || 1000
-            };
+            var norm = normalizeBooking(it, j);
             var prev = map[norm.id];
             if (!prev || (norm.updatedAt >= (prev.updatedAt || 0))) {
               map[norm.id] = norm;
@@ -349,10 +365,10 @@ function loadNotes() {
   try {
     var n = JSON.parse(localStorage.getItem("lab_notes_v1"));
     if (Array.isArray(n)) {
-      return n.filter(function(item) { return item && !SAVED_DEL_IDS[item.id]; });
+      return n.filter(function(item) { return item && item.id && !SAVED_DEL_IDS[item.id]; });
     }
   } catch (e) {}
-  return [{ id: "n1", text: T.defNote1 }];
+  return [{ id: "n1", text: T.defNote1, updatedAt: 1000 }];
 }
 
 var TODAY_ISO = fmtIso(new Date());
@@ -367,6 +383,8 @@ var S = {
   draftNote: "",
   customAvatar: localStorage.getItem("ilan_avatar_img") || "",
   synced: false,
+  syncing: true,
+  hasPendingPush: localStorage.getItem("lab_pending_push") === "1",
   modal: false,
   editId: null,
   calItem: null,
@@ -384,6 +402,10 @@ var S = {
     raNeeded: 0
   }
 };
+
+function nextTimestamp(prevTs) {
+  return Math.max(Date.now(), Number(prevTs || 0) + 1);
+}
 
 function isUserTyping() {
   var el = document.activeElement;
@@ -416,7 +438,7 @@ window.uploadAvatarFile = function(ev) {
       ctx.drawImage(img, 0, 0, 120, 120);
       S.customAvatar = c.toDataURL("image/jpeg", 0.8);
       try { localStorage.setItem("ilan_avatar_img", S.customAvatar); } catch (err) {}
-      saveAndPush();
+      draw();
     };
     img.src = e.target.result;
   };
@@ -425,26 +447,163 @@ window.uploadAvatarFile = function(ev) {
 
 function saveLocalOnly() {
   try {
+    localStorage.setItem("lab_v16", JSON.stringify(S.list));
+    localStorage.setItem("lab_v15", JSON.stringify(S.list));
     localStorage.setItem("lab_v14", JSON.stringify(S.list));
-    localStorage.setItem("lab_v13", JSON.stringify(S.list));
     localStorage.setItem("lab_del_v10", JSON.stringify(S.deletedIds));
     localStorage.setItem("lab_notes_v1", JSON.stringify(S.notes));
   } catch (e) {}
 }
 
+// בניית מטען (Payload) חסכוני שמונע חריגה ממגבלת 4KB של ntfy.sh ושומר תאימות לאחור
 function buildPayload() {
-  return {
+  var cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - 21);
+  var cutoffIso = fmtIso(cutoffDate);
+
+  // מסננים החוצה שיבוצים ישנים מלפני יותר מ-3 שבועות רק אם החבילה מתקרבת למגבלת 4KB
+  var fullPayload = {
+    cid: CLIENT_ID,
     ts: Date.now(),
     list: S.list,
     deletedIds: S.deletedIds,
     notes: S.notes
   };
+
+  var encodedFull = toB64(fullPayload);
+  if (encodedFull.length <= 3800) {
+    return encodedFull;
+  }
+
+  // אם החבילה גדולה מ-3800 תווים, נשלח בענן רק שיבוצים רלוונטיים (3 שבועות אחורה ומעלה)
+  var recentList = S.list.filter(function(b) {
+    return b && b.date >= cutoffIso;
+  });
+  var trimmedPayload = {
+    cid: CLIENT_ID,
+    ts: Date.now(),
+    list: recentList,
+    deletedIds: S.deletedIds,
+    notes: S.notes.slice(0, 15)
+  };
+  var encodedTrimmed = toB64(trimmedPayload);
+  if (encodedTrimmed.length <= 3950) {
+    return encodedTrimmed;
+  }
+
+  // דחיסה נוספת במקרה של עשרות שיבוצים עתידיים במקביל
+  var compactItems = recentList.map(function(b) {
+    return [
+      b.id, b.equipmentId, b.date, b.startTime, b.endTime,
+      b.studentName, b.experiment || "", b.needsIlan ? 1 : 0,
+      b.ilanApproved ? 1 : 0, b.raNeeded || 0, b.raList || [], b.updatedAt || 1000
+    ];
+  });
+  return "BGU16:" + JSON.stringify({
+    cid: CLIENT_ID,
+    ts: Date.now(),
+    cList: compactItems,
+    del: Object.keys(S.deletedIds).slice(-120),
+    notes: S.notes.slice(0, 10)
+  });
 }
 
-function mergeRemoteState(remote) {
-  if (!remote || !Array.isArray(remote.list)) return { changed: false, localHasMore: false };
+function toB64(obj) {
+  return "BGU15:" + btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+}
+
+function fromB64(str) {
+  if (!str || typeof str !== "string") return null;
+  var clean = str.trim();
+  if (clean.indexOf("BGU16:") === 0) {
+    try {
+      var raw16 = JSON.parse(clean.slice(6));
+      var delMap = {};
+      if (Array.isArray(raw16.del)) {
+        for (var i = 0; i < raw16.del.length; i++) delMap[raw16.del[i]] = true;
+      }
+      var expList = [];
+      if (Array.isArray(raw16.cList)) {
+        for (var j = 0; j < raw16.cList.length; j++) {
+          var a = raw16.cList[j];
+          if (Array.isArray(a)) {
+            expList.push({
+              id: a[0], equipmentId: a[1], date: a[2], startTime: a[3], endTime: a[4],
+              studentName: a[5], experiment: a[6], needsIlan: !!a[7], ilanApproved: !!a[8],
+              raNeeded: Number(a[9] || 0), raList: Array.isArray(a[10]) ? a[10] : [], updatedAt: Number(a[11] || 1000)
+            });
+          }
+        }
+      }
+      return {
+        cid: raw16.cid,
+        ts: raw16.ts,
+        list: expList,
+        deletedIds: delMap,
+        notes: Array.isArray(raw16.notes) ? raw16.notes : []
+      };
+    } catch (e) { return null; }
+  }
+  if (clean.indexOf("BGU15:") === 0) {
+    try {
+      return JSON.parse(decodeURIComponent(escape(atob(clean.slice(6)))));
+    } catch (e) { return null; }
+  }
+  if (clean.charAt(0) === "{") {
+    try { return JSON.parse(clean); } catch (e) { return null; }
+  }
+  return null;
+}
+
+// מעקב אחר מה שכבר קיים בענן כדי לדעת אם יש מידע מקומי שצריך לשחזר לענן
+var remoteKnownItems = {};
+var remoteKnownDeletes = {};
+var didInitialReseedCheck = false;
+
+function recordRemoteKnowledge(remote) {
+  if (!remote) return;
+  if (remote.deletedIds) {
+    for (var d in remote.deletedIds) {
+      if (remote.deletedIds.hasOwnProperty(d)) remoteKnownDeletes[d] = true;
+    }
+  }
+  if (Array.isArray(remote.list)) {
+    for (var i = 0; i < remote.list.length; i++) {
+      var rb = remote.list[i];
+      if (rb && rb.id) {
+        var prevTs = remoteKnownItems[rb.id] || 0;
+        var curTs = Number(rb.updatedAt || 1000);
+        if (curTs >= prevTs) remoteKnownItems[rb.id] = curTs;
+      }
+    }
+  }
+}
+
+function hasLocalChangesMissingFromCloud() {
+  for (var i = 0; i < S.list.length; i++) {
+    var lb = S.list[i];
+    if (!lb || S.deletedIds[lb.id]) continue;
+    var lTs = Number(lb.updatedAt || 1000);
+    // בודקים רק פריטים שנוצרו או נערכו על ידי משתמש (updatedAt > 1000)
+    if (lTs > 1000) {
+      var rTs = remoteKnownItems[lb.id] || 0;
+      if (lTs > rTs) return true;
+    }
+  }
+  for (var d in S.deletedIds) {
+    if (S.deletedIds.hasOwnProperty(d) && !remoteKnownDeletes[d]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function mergeRemoteState(remote, skipRender) {
+  if (!remote || !Array.isArray(remote.list)) return false;
+  recordRemoteKnowledge(remote);
+  if (remote.cid && remote.cid === CLIENT_ID) return false;
+
   var changed = false;
-  var localHasUnpushed = false;
 
   if (remote.deletedIds) {
     for (var dId in remote.deletedIds) {
@@ -454,27 +613,12 @@ function mergeRemoteState(remote) {
       }
     }
   }
-  for (var myDel in S.deletedIds) {
-    if (S.deletedIds.hasOwnProperty(myDel) && (!remote.deletedIds || !remote.deletedIds[myDel])) {
-      localHasUnpushed = true;
-    }
-  }
-
-  var remoteMap = {};
-  for (var r = 0; r < remote.list.length; r++) {
-    if (remote.list[r] && remote.list[r].id) {
-      remoteMap[remote.list[r].id] = remote.list[r];
-    }
-  }
 
   var map = {};
   for (var i = 0; i < S.list.length; i++) {
     var lb = S.list[i];
     if (!S.deletedIds[lb.id]) {
       map[lb.id] = lb;
-      if (!remoteMap[lb.id]) {
-        localHasUnpushed = true;
-      }
     } else {
       changed = true;
     }
@@ -483,16 +627,20 @@ function mergeRemoteState(remote) {
   for (var j = 0; j < remote.list.length; j++) {
     var rb = remote.list[j];
     if (rb && rb.id && !S.deletedIds[rb.id]) {
-      rb.raNeeded = Number(rb.raNeeded || 0);
-      rb.raList = Array.isArray(rb.raList) ? rb.raList : [];
-      var existing = map[rb.id];
-      if (!existing || (rb.updatedAt || 0) > (existing.updatedAt || 0)) {
-        if (JSON.stringify(existing) !== JSON.stringify(rb)) {
-          map[rb.id] = rb;
-          changed = true;
+      var normR = normalizeBooking(rb, j);
+      var existing = map[normR.id];
+      if (!existing) {
+        map[normR.id] = normR;
+        changed = true;
+      } else {
+        var rTime = Number(normR.updatedAt || 1000);
+        var lTime = Number(existing.updatedAt || 1000);
+        if (rTime > lTime) {
+          if (JSON.stringify(existing) !== JSON.stringify(normR)) {
+            map[normR.id] = normR;
+            changed = true;
+          }
         }
-      } else if (existing && (existing.updatedAt || 0) > (rb.updatedAt || 0)) {
-        localHasUnpushed = true;
       }
     }
   }
@@ -503,7 +651,6 @@ function mergeRemoteState(remote) {
   }
   S.list = merged;
 
-  // מיזוג הודעות לוח מודעות לפי מזהה (ללא תלות בשעון המכשיר)
   if (Array.isArray(remote.notes)) {
     var noteMap = {};
     var noteOrder = [];
@@ -512,6 +659,8 @@ function mergeRemoteState(remote) {
       if (ln && ln.id && !S.deletedIds[ln.id]) {
         noteMap[ln.id] = ln;
         noteOrder.push(ln.id);
+      } else {
+        changed = true;
       }
     }
     for (var nj = 0; nj < remote.notes.length; nj++) {
@@ -530,84 +679,249 @@ function mergeRemoteState(remote) {
     S.notes = mergedNotes;
   }
 
-  if (changed) {
+  if (changed && !skipRender) {
     saveLocalOnly();
     if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
   }
-  return { changed: changed, localHasMore: localHasUnpushed };
+  return changed;
 }
 
-// מנוע סנכרון משולש בזמן אמת (MQTT WebSockets עם Retain=true)
-var MQTT_TOPIC = "bgu_ilan_lab_2026_v14/state";
+// =========================================================================
+// מנגנון סנכרון מתוקן (ללא הצפות 429, עם תמיכה מלאה ב-MQTT + ntfy + BroadcastChannel)
+// =========================================================================
+var SYNC_TOPIC = "bgu_ilan_lab_v15_sync";
 var mqttClients = [];
+var lastNtfyTimestamp = 0;
+var lastPullAttemptMs = 0;
+var isPulling = false;
+var pushDebounceTimer = null;
+var sseSource = null;
+var localChannel = null;
 
-function publishToAllBrokers() {
-  var msgStr = JSON.stringify(buildPayload());
+try {
+  if (typeof BroadcastChannel !== "undefined") {
+    localChannel = new BroadcastChannel("bgu_ilan_lab_channel");
+    localChannel.onmessage = function(ev) {
+      if (ev && ev.data) {
+        var decoded = fromB64(ev.data);
+        if (decoded) mergeRemoteState(decoded, false);
+      }
+    };
+  }
+} catch (e) {}
+
+window.addEventListener("storage", function(ev) {
+  if (ev.key === "lab_v16" || ev.key === "lab_del_v10" || ev.key === "lab_notes_v1") {
+    try {
+      S.deletedIds = JSON.parse(localStorage.getItem("lab_del_v10") || "{}");
+      SAVED_DEL_IDS = S.deletedIds;
+      S.list = loadMergedBookings();
+      S.notes = loadNotes();
+      if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
+    } catch (e) {}
+  }
+});
+
+function setPendingPush(val) {
+  S.hasPendingPush = !!val;
+  try {
+    if (val) localStorage.setItem("lab_pending_push", "1");
+    else localStorage.removeItem("lab_pending_push");
+  } catch (e) {}
+}
+
+function publishToAllBrokers(encodedStr) {
+  var publishedToAny = false;
   for (var i = 0; i < mqttClients.length; i++) {
     try {
       if (mqttClients[i] && mqttClients[i].connected) {
-        mqttClients[i].publish(MQTT_TOPIC, msgStr, { qos: 1, retain: true });
+        mqttClients[i].publish(SYNC_TOPIC + "/state", encodedStr, { qos: 1, retain: true });
+        publishedToAny = true;
       }
     } catch (e) {}
   }
+  return publishedToAny;
 }
 
-function initRealtimeSync() {
-  if (typeof mqtt === "undefined") return;
-  var brokers = [
-    "wss://broker.emqx.io:8084/mqtt",
-    "wss://broker.hivemq.com:8884/mqtt",
-    "wss://test.mosquitto.org:8081"
-  ];
+function pushCloud() {
+  if (pushDebounceTimer) clearTimeout(pushDebounceTimer);
+  pushDebounceTimer = setTimeout(function() {
+    var encoded = buildPayload();
 
-  for (var i = 0; i < brokers.length; i++) {
-    (function(url) {
-      try {
-        var client = mqtt.connect(url, {
-          clientId: "bgu_lab_" + Math.random().toString(16).slice(2, 10),
-          clean: true,
-          connectTimeout: 5000,
-          reconnectPeriod: 3000
-        });
+    if (localChannel) {
+      try { localChannel.postMessage(encoded); } catch (e) {}
+    }
 
-        var gotInitialRetained = false;
+    var mqttOk = publishToAllBrokers(encoded);
+    if (mqttOk) {
+      S.synced = true;
+      S.syncing = false;
+    }
 
-        client.on("connect", function() {
-          if (!S.synced) {
-            S.synced = true;
-            if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
+    fetch("https://ntfy.sh/" + SYNC_TOPIC, {
+      method: "POST",
+      body: encoded
+    }).then(function(res) {
+      if (res.ok) {
+        S.synced = true;
+        S.syncing = false;
+        setPendingPush(false);
+        if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
+      } else if (mqttOk) {
+        setPendingPush(false);
+      }
+    }).catch(function() {
+      if (mqttOk) setPendingPush(false);
+    });
+  }, 250);
+}
+
+window.pullCloudHistory = function(forceFull) {
+  var now = Date.now();
+  if (isPulling) return;
+  if (!forceFull && now - lastPullAttemptMs < 8000) return;
+
+  isPulling = true;
+  lastPullAttemptMs = now;
+
+  var sinceParam = (!forceFull && lastNtfyTimestamp > 0) ? String(lastNtfyTimestamp) : "all";
+  fetch("https://ntfy.sh/" + SYNC_TOPIC + "/json?poll=1&since=" + sinceParam)
+    .then(function(res) {
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status);
+      }
+      return res.text();
+    })
+    .then(function(text) {
+      isPulling = false;
+      var lines = text.trim().split("\n");
+      var anyChanged = false;
+      for (var i = 0; i < lines.length; i++) {
+        if (!lines[i]) continue;
+        try {
+          var env = JSON.parse(lines[i]);
+          if (env && env.time && env.time > lastNtfyTimestamp) {
+            lastNtfyTimestamp = env.time;
           }
-          client.subscribe(MQTT_TOPIC, { qos: 1 }, function() {
-            setTimeout(function() {
-              if (!gotInitialRetained) {
-                client.publish(MQTT_TOPIC, JSON.stringify(buildPayload()), { qos: 1, retain: true });
+          if (env && env.message) {
+            var decoded = fromB64(env.message);
+            if (decoded) {
+              if (mergeRemoteState(decoded, true)) {
+                anyChanged = true;
               }
-            }, 1500);
-          });
-        });
-
-        client.on("message", function(topic, payloadBuf) {
-          if (topic !== MQTT_TOPIC) return;
-          gotInitialRetained = true;
-          try {
-            var data = JSON.parse(payloadBuf.toString());
-            var res = mergeRemoteState(data);
-            if (res.localHasMore) {
-              client.publish(MQTT_TOPIC, JSON.stringify(buildPayload()), { qos: 1, retain: true });
             }
-          } catch (e) {}
-        });
+          }
+        } catch (e) {}
+      }
+      S.synced = true;
+      S.syncing = false;
+      if (anyChanged) {
+        saveLocalOnly();
+      }
+      // אם יש שינויים מקומיים שטרם נשלחו, או שבטעינה הראשונית מתברר שהענן התרוקן (אחרי 12 שעות ב-ntfy)
+      var shouldReseed = false;
+      if (!didInitialReseedCheck && sinceParam === "all") {
+        didInitialReseedCheck = true;
+        shouldReseed = hasLocalChangesMissingFromCloud();
+      }
+      if (S.hasPendingPush || shouldReseed) {
+        pushCloud();
+      } else if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) {
+        draw();
+      }
+    }).catch(function() {
+      isPulling = false;
+      S.syncing = false;
+      if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
+    });
+};
 
-        mqttClients.push(client);
-      } catch (err) {}
-    })(brokers[i]);
+function connectSseStream() {
+  if (typeof EventSource === "undefined") return;
+  try {
+    if (sseSource) {
+      try { sseSource.close(); } catch (e) {}
+    }
+    sseSource = new EventSource("https://ntfy.sh/" + SYNC_TOPIC + "/sse");
+    sseSource.onopen = function() {
+      S.synced = true;
+      S.syncing = false;
+      if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
+    };
+    sseSource.onmessage = function(ev) {
+      try {
+        var env = JSON.parse(ev.data);
+        if (env && env.time && env.time > lastNtfyTimestamp) {
+          lastNtfyTimestamp = env.time;
+        }
+        if (env && env.message) {
+          var decoded = fromB64(env.message);
+          if (decoded) mergeRemoteState(decoded, false);
+        }
+      } catch (e) {}
+    };
+    sseSource.onerror = function() {
+      // חיבור מחדש אוטומטי אם הזרם נסגר
+      if (sseSource && sseSource.readyState === 2) {
+        setTimeout(connectSseStream, 10000);
+      }
+    };
+  } catch (e) {}
+}
+
+function initRealtimeStreams() {
+  // 1. חיבור SSE בזמן אמת בפורט 443
+  connectSseStream();
+
+  // 2. חיבור לשרתי MQTT ציבוריים אמינים עם שמירת מצב (Retained State) וללא לולאת הדהוד
+  if (typeof mqtt !== "undefined") {
+    var brokers = [
+      "wss://broker.emqx.io:8084/mqtt",
+      "wss://broker.hivemq.com:8884/mqtt",
+      "wss://test.mosquitto.org:8081/mqtt"
+    ];
+    for (var i = 0; i < brokers.length; i++) {
+      (function(url) {
+        try {
+          var client = mqtt.connect(url, {
+            clientId: "bgu16_" + Math.random().toString(16).slice(2, 10),
+            clean: true,
+            connectTimeout: 6000,
+            reconnectPeriod: 6000
+          });
+          client.on("connect", function() {
+            S.synced = true;
+            S.syncing = false;
+            client.subscribe(SYNC_TOPIC + "/state", { qos: 1 });
+            if (S.hasPendingPush) {
+              client.publish(SYNC_TOPIC + "/state", buildPayload(), { qos: 1, retain: true });
+            }
+            if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) draw();
+          });
+          client.on("message", function(topic, buf) {
+            var decoded = fromB64(buf.toString());
+            if (decoded) {
+              mergeRemoteState(decoded, false);
+            }
+          });
+          mqttClients.push(client);
+        } catch (err) {}
+      })(brokers[i]);
+    }
   }
+
+  // 3. סנכרון חכם כשחוזרים ללשונית (עם הגבלת קצב למניעת חסימת 429)
+  window.addEventListener("focus", function() { window.pullCloudHistory(false); });
+  document.addEventListener("visibilitychange", function() {
+    if (!document.hidden) window.pullCloudHistory(false);
+  });
 }
 
 function saveAndPush() {
+  setPendingPush(true);
   saveLocalOnly();
   draw();
-  publishToAllBrokers();
+  pushCloud();
 }
 
 window.onNoteInput = function(val) {
@@ -624,7 +938,8 @@ window.addNote = function(ev) {
   if (!text) return;
   S.notes.unshift({
     id: "n" + Date.now() + "_" + Math.floor(Math.random() * 100),
-    text: text
+    text: text,
+    updatedAt: Date.now()
   });
   S.draftNote = "";
   saveAndPush();
@@ -663,7 +978,7 @@ window.submitRaJoin = function(ev) {
       if (!Array.isArray(b.raList)) b.raList = [];
       if (b.raList.indexOf(name) === -1 && b.raList.length < (b.raNeeded || 0)) {
         b.raList.push(name);
-        b.updatedAt = Date.now();
+        b.updatedAt = nextTimestamp(b.updatedAt);
       }
     }
   }
@@ -677,7 +992,7 @@ window.removeRaHelper = function(bookingId, helperName, ev) {
     var b = S.list[i];
     if (b.id === bookingId && Array.isArray(b.raList)) {
       b.raList = b.raList.filter(function(x) { return x !== helperName; });
-      b.updatedAt = Date.now();
+      b.updatedAt = nextTimestamp(b.updatedAt);
     }
   }
   saveAndPush();
@@ -881,7 +1196,7 @@ window.okIlan = function(id) {
   for (var i = 0; i < S.list.length; i++) {
     if (S.list[i].id === id) {
       S.list[i].ilanApproved = !S.list[i].ilanApproved;
-      S.list[i].updatedAt = Date.now();
+      S.list[i].updatedAt = nextTimestamp(S.list[i].updatedAt);
     }
   }
   saveAndPush();
@@ -943,7 +1258,7 @@ window.saveForm = function(ev) {
         S.list[j].needsIlan = il;
         S.list[j].raNeeded = ra;
         if (!Array.isArray(S.list[j].raList)) S.list[j].raList = [];
-        S.list[j].updatedAt = Date.now();
+        S.list[j].updatedAt = nextTimestamp(S.list[j].updatedAt);
       }
     }
     S.modal = false;
@@ -1083,9 +1398,9 @@ function draw() {
   h += '<div class="hdr-title">';
   h += renderAvatarHtml();
   h += '<div><h1>' + T.title + '</h1>';
-  h += '<div class="sync-badge">';
+  h += '<div class="sync-badge" onclick="pullCloudHistory(true)" title="לחץ לסנכרון מיידי מהענן">';
   h += '<span class="dot ' + (S.synced ? 'dot-ok' : 'dot-wait') + '"></span>';
-  h += '<span>' + (S.synced ? T.syncOk : T.syncWait) + '</span></div></div></div>';
+  h += '<span>' + (S.synced ? (T.syncOk + S.list.length + T.syncItems) : T.syncWait) + '</span></div></div></div>';
   h += '<button class="btn-main" onclick="openAdd()">' + T.newBtn + '</button></div>';
 
   h += '<div class="bar">';
@@ -1381,7 +1696,13 @@ function draw() {
 }
 
 draw();
-initRealtimeSync();
+window.pullCloudHistory(true);
+initRealtimeStreams();
+setInterval(function() {
+  if (!isUserTyping() && !S.modal && !S.calItem && !S.raModalId) {
+    window.pullCloudHistory(false);
+  }
+}, 45000);
 </script>
 </body>
 </html>
